@@ -1,0 +1,53 @@
+services:
+  #
+  # Development environment
+  #
+  soundgo_env:
+    profiles: [dev]
+    container_name: soundgo_env
+    tty: true
+    stdin_open: true
+    image: soundgo:0.0.1
+    build:
+      context: .
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - .:/usr/src/app
+      - ~/.cache:/root/.cache/go-build
+      - ~/go/pkg/mod:/go/pkg/mod
+    ports:
+      - 3000:3000
+      - 8080:8080
+  db:
+    profiles: [dev]
+    image: postgres:16-alpine
+    container_name: soundgo_db
+    healthcheck:
+      start_period: 30s
+      test: pg_isready -U admin -d soundgo
+      interval: 2s
+    restart: always
+    ports:
+      - 5432:5432
+    shm_size: 128mb
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: soundgo
+
+  test_db:
+    profiles: [test]
+    image: postgres:16-alpine
+    container_name: soundgo_test_db
+    healthcheck:
+      start_period: 30s
+      test: pg_isready -U admin -d soundgo_test
+      interval: 2s
+    restart: always
+    shm_size: 128mb
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: soundgo_test

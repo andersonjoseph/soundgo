@@ -1,0 +1,33 @@
+operationId: registerUser
+security: []
+tags: 
+  - users
+summary: Register User
+description:  This request creates a new user account. The request body should include user information such as username, email address, and password
+requestBody:
+  description: The user to create
+  required: true
+  content:
+    application/json:
+      schema:
+        $ref: "../../schemas/users.yaml#/RegisterUserDto"
+
+responses:
+  '201': 
+    description: User Created
+    content:
+      application/json:
+        schema:
+          $ref: "../../schemas/users.yaml#/User"
+  '400': 
+    description: Bad Request
+    content:
+      application/json:
+        schema:
+          $ref: "../../schemas/errors.yaml#/Error"
+  '409': 
+    description: User already exists
+    content:
+      application/json:
+        schema:
+          $ref: "../../schemas/errors.yaml#/Error"

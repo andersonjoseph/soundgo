@@ -1,0 +1,38 @@
+User:
+  type: object
+  properties:
+    username:
+      description: user name
+      type: string
+      minLength: 3
+      maxLength: 32
+    email:
+      description: user email
+      type: string
+      format: email
+
+RegisterUserDto:
+  type: object
+  properties:
+    username:
+      description: unique username
+      type: string
+      minLength: 3
+      maxLength: 32
+    email:
+      description: user email
+      type: string
+      format: email
+    password:
+      description: user password
+      type: string
+      format: password
+
+UpdateUserDto:
+  type: object
+  properties:
+    username:
+      description: unique username
+      type: string
+      minLength: 3
+      maxLength: 32

@@ -1,0 +1,3 @@
+  schemas:
+    $ref: "./users.yaml"
+    $ref: "./errors.yaml"

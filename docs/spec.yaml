@@ -1,0 +1,30 @@
+openapi: 3.1.0
+info:
+  title: Soundgo
+  description: Dead simple audio hosting
+
+  contact:
+    email: andersonjoseph@mailfence.com
+  license:
+    name: WTFPL
+    url: https://choosealicense.com/licenses/wtfpl/
+
+  version: 0.0.1
+
+servers:
+  - url: http://192.168.1.136:3000
+tags:
+  - name: users
+    description: >
+      The User endpoints provide a comprehensive interface for managing user accounts within your application.
+      This includes operations for creating new users, modifying existing user information, and retrieving user details.
+
+paths:
+    /api/v1/users:
+      $ref: "./paths/users/users.yaml"
+
+    /api/v1/sessions:
+      $ref: "./paths/sessions/sessions.yaml"
+
+    /api/v1/password-reset:
+      $ref: "./paths/password-reset/password-reset.yaml"

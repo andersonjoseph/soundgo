@@ -1,0 +1,5 @@
+post:
+  $ref: "./register-user.yaml"
+
+patch:
+  $ref: "./update-user.yaml"

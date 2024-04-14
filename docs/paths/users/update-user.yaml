@@ -1,0 +1,33 @@
+operationId: updateUser
+security: []
+tags: 
+  - users
+summary: Update User
+description: This request updates an existing user's information. The request body should include any user data that needs modification, such as username.
+requestBody:
+  description: The user fields 
+  required: false
+  content:
+    application/json:
+      schema:
+        $ref: "../../schemas/users.yaml#/UpdateUserDto"
+
+responses:
+  '200': 
+    description: User Updated
+    content:
+      application/json:
+        schema:
+          $ref: "../../schemas/users.yaml#/User"
+  '400': 
+    description: Bad Request
+    content:
+      application/json:
+        schema:
+          $ref: "../../schemas/errors.yaml#/Error"
+  '409': 
+    description: User already exists
+    content:
+      application/json:
+        schema:
+          $ref: "../../schemas/errors.yaml#/Error"

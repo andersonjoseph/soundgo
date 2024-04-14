@@ -1,0 +1,33 @@
+operationId: createSession
+security: []
+tags: 
+  - sessions
+summary: Create Session
+description: This request creates a new session for the user. Exchanges the username and password for an auth token.
+requestBody:
+  description: Username and password
+  required: true
+  content:
+    application/json:
+      schema:
+        $ref: "../../schemas/sessions.yaml#/CreateSessionDto"
+
+responses:
+  '201': 
+    description: Session Created
+    content:
+      application/json:
+        schema:
+          $ref: "../../schemas/sessions.yaml#/SessionToken"
+  '400': 
+    description: Bad Request
+    content:
+      application/json:
+        schema:
+          $ref: "../../schemas/errors.yaml#/Error"
+  '401': 
+    description: Unauthorized, username or password wrong
+    content:
+      application/json:
+        schema:
+          $ref: "../../schemas/errors.yaml#/Error"

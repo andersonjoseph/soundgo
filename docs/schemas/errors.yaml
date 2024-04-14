@@ -1,0 +1,9 @@
+Error:
+  type: object
+  properties:
+    error:
+      description: http error name
+      type: string
+    message:
+      description: a more more detailed description for this error
+      type: string
