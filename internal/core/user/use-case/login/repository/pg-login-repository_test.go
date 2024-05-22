@@ -21,11 +21,12 @@ func TestIntegrationPgRepository_FindPasswordByUsername(t *testing.T) {
 	connString := os.Getenv("DB")
 
 	conn, err := pgxpool.New(context.Background(), connString)
-	repo := repository.NewPGRepository(conn)
 
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	repo := repository.NewPGRepository(conn)
 
 	createdUser, err := testhelper.CreateUser(t, conn, "find_password_user@mail.com", "find_password_user", "password")
 
