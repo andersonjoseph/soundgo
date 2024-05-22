@@ -1,17 +1,19 @@
 package server
 
 import (
+	"fmt"
 	"log/slog"
 	"net/http"
 
 	"github.com/andersonjoseph/soundgo/internal/core/user/service"
+	"github.com/andersonjoseph/soundgo/internal/shared"
 
 	"github.com/andersonjoseph/soundgo/internal/core/user/use-case/register"
 
 	registerRepository "github.com/andersonjoseph/soundgo/internal/core/user/use-case/register/repository"
 )
 
-func (s *server) handleRegisterUser() http.HandlerFunc {
+func (s *server) handleRegisterUser(idEncoder shared.IDEncoder) http.HandlerFunc {
 	type request struct {
 		Email    string `json:"email"`
 		Username string `json:"username"`
@@ -19,7 +21,7 @@ func (s *server) handleRegisterUser() http.HandlerFunc {
 	}
 
 	type response struct {
-		ID       int    `json:"id"`
+		ID       string `json:"id"`
 		Email    string `json:"email"`
 		Username string `json:"username"`
 	}
@@ -81,8 +83,15 @@ func (s *server) handleRegisterUser() http.HandlerFunc {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
 
+		encodedId, err := idEncoder.Encode(u.ID)
+
+		if err != nil {
+			s.handleError(r.Context(), fmt.Errorf("error encoding user id: %w", err), w)
+			return
+		}
+
 		err = sendResponse(w, response{
-			ID:       u.ID,
+			ID:       encodedId,
 			Email:    u.Email.String(),
 			Username: u.Username.String(),
 		})

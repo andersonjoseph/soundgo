@@ -2,10 +2,13 @@ package server
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"math/rand"
 	"net/http"
 	"time"
+
+	"github.com/sqids/sqids-go"
 )
 
 func (s server) middlewarePrepareHandler(h http.HandlerFunc) http.HandlerFunc {
@@ -42,7 +45,37 @@ func (s server) middlewarePrepareHandler(h http.HandlerFunc) http.HandlerFunc {
 	})
 }
 
+type sqidsIDEncoder struct {
+	sqids sqids.Sqids
+}
+
+func newSqidsEncoder() (sqidsIDEncoder, error) {
+	s, err := sqids.New()
+
+	if err != nil {
+		return sqidsIDEncoder{}, err
+	}
+
+	return sqidsIDEncoder{
+		sqids: *s,
+	}, err
+}
+
+func (e sqidsIDEncoder) Encode(id int) (string, error) {
+	return e.sqids.Encode([]uint64{uint64(id)})
+}
+
+func (e sqidsIDEncoder) Decode(id string) int {
+	return int(e.sqids.Decode(id)[0])
+}
+
 func (s *server) registerRoutes() {
+	idEncoder, err := newSqidsEncoder()
+
+	if err != nil {
+		panic(fmt.Errorf("error creating id encoder: %w", err))
+	}
+
 	s.handler.HandleFunc("GET /api/v1/health", s.handleHealthCheck())
 
 	s.handler.HandleFunc("POST /api/v1/sessions", s.middlewarePrepareHandler(s.handleCreateSession()))
@@ -50,5 +83,11 @@ func (s *server) registerRoutes() {
 	s.handler.HandleFunc("POST /api/v1/password-reset", s.middlewarePrepareHandler(s.handleRequestResetPassword()))
 	s.handler.HandleFunc("PUT /api/v1/password-reset", s.middlewarePrepareHandler(s.handleResetPassword()))
 
-	s.handler.HandleFunc("POST /api/v1/users", s.middlewarePrepareHandler(s.handleRegisterUser()))
+	s.handler.HandleFunc("POST /api/v1/users",
+		s.middlewarePrepareHandler(
+			s.handleRegisterUser(
+				idEncoder,
+			),
+		),
+	)
 }
