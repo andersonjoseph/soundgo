@@ -56,11 +56,11 @@ func (s *server) handleError(ctx context.Context, err error, w http.ResponseWrit
 	)
 
 	if httpCode == http.StatusInternalServerError {
-		jsonError(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+		sendError(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 		return
 	}
 
-	jsonError(w, err.Error(), httpCode)
+	sendError(w, err.Error(), httpCode)
 }
 
 func NewServer(

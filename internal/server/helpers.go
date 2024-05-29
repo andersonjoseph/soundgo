@@ -27,7 +27,7 @@ func sendResponse(dest io.Writer, body any) error {
 	return nil
 }
 
-func jsonError(w http.ResponseWriter, err string, code int) {
+func sendError(w http.ResponseWriter, err string, code int) {
 	res := struct {
 		Error   string `json:"error"`
 		Message string `json:"message"`
