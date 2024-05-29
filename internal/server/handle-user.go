@@ -9,6 +9,8 @@ import (
 	"github.com/andersonjoseph/soundgo/internal/shared"
 
 	"github.com/andersonjoseph/soundgo/internal/core/user/use-case/register"
+	"github.com/andersonjoseph/soundgo/internal/core/user/use-case/update-info"
+	updateInfoRepository "github.com/andersonjoseph/soundgo/internal/core/user/use-case/update-info/repository"
 
 	registerRepository "github.com/andersonjoseph/soundgo/internal/core/user/use-case/register/repository"
 )
@@ -102,5 +104,65 @@ func (s *server) handleRegisterUser(idEncoder shared.IDEncoder) http.HandlerFunc
 		}
 
 		return
+	}
+}
+
+func (s *server) handleUpdateUserInfo(idEncoder shared.IDEncoder) http.HandlerFunc {
+	type request struct {
+		Username string `json:"username"`
+	}
+
+	service := updateuserinfo.New(
+		updateInfoRepository.NewPGRepository(s.db),
+	)
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		encodedID := r.PathValue("id")
+
+		id := idEncoder.Decode(encodedID)
+
+		if id == 0 {
+			s.handleError(r.Context(), fmt.Errorf("bad user id: %w", shared.ErrBadRequest), w)
+			return
+		}
+
+		body, err := decodeBody[request](r.Body)
+
+		logger := s.logger.With(
+			slog.Group(
+				"req",
+				"id", r.Context().Value("req_id"),
+				"path", r.Context().Value("req_path"),
+			),
+		)
+
+		logger.LogAttrs(
+			r.Context(),
+			slog.LevelInfo,
+			"updating user info",
+			slog.Group(
+				"user",
+				slog.Int("id", id),
+			),
+			slog.Group(
+				"body",
+				slog.String("username", body.Username),
+			),
+		)
+
+		if err != nil {
+			s.handleError(r.Context(), err, w)
+			return
+		}
+
+		err = service.UpdateInfo(r.Context(), updateuserinfo.UpdateInfoParams{
+			ID:       id,
+			Username: body.Username,
+		})
+
+		if err != nil {
+			s.handleError(r.Context(), err, w)
+			return
+		}
 	}
 }

@@ -83,6 +83,14 @@ func (s *server) registerRoutes() {
 	s.handler.HandleFunc("POST /api/v1/password-reset", s.middlewarePrepareHandler(s.handleRequestResetPassword()))
 	s.handler.HandleFunc("PUT /api/v1/password-reset", s.middlewarePrepareHandler(s.handleResetPassword()))
 
+	s.handler.HandleFunc("PATCH /api/v1/users/{id}",
+		s.middlewarePrepareHandler(
+			s.handleUpdateUserInfo(
+				idEncoder,
+			),
+		),
+	)
+
 	s.handler.HandleFunc("POST /api/v1/users",
 		s.middlewarePrepareHandler(
 			s.handleRegisterUser(
