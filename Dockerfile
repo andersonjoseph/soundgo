@@ -30,4 +30,4 @@ ENV PATH "/root/.nvm/versions/node/v${NODE_VERSION}/bin/:${PATH}"
 RUN npm i -g @redocly/cli@latest
 
 # install ogen (https://github.com/ogen-go/ogen)
-RUN go get -d github.com/ogen-go/ogen
+RUN go get -d github.com/ogen-go/ogen@v1.2.2
