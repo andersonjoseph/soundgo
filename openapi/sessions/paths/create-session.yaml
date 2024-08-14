@@ -1,0 +1,28 @@
+tags:
+  - Session
+
+summary: Create a new session
+
+description: |
+  This operation creates a new session (user login)
+
+operationId: createSession
+
+security: []
+
+requestBody:
+  required: true
+  content:
+    application/json:
+      schema:
+        $ref: '../schemas/session-input.yaml'
+
+responses:
+  '201':
+    description: session created successfully
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/session.yaml'
+  '401':
+    $ref: '../../_components/responses/unauthorized.yaml'

@@ -1,0 +1,62 @@
+tags:
+  - User
+
+summary: Update an existing user
+
+description: |
+  This operation updates the details of an existing user in the system using the provided information.
+  The request body must include all the necessary details required for updating the user.
+  If the user is successfully updated, the server will return a 200 status code along with the updated user details.
+  If there are any issues with the input data or if the user does not exist, appropriate error responses will be returned.
+
+operationId: updateUser
+
+security: 
+  - bearerAuth: []
+
+parameters:
+  - in: path
+    name: id
+    required: true
+    schema:
+      type: string
+      description: ID of the user to update
+
+requestBody:
+  required: true
+  content:
+    application/json:
+      schema:
+        $ref: '../schemas/update-user-input.yaml'
+
+responses:
+  '200':
+    description: User updated successfully
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/user.yaml'
+
+  '400':
+    description: |
+      Bad request - The input provided is invalid. This can happen due to missing required fields,
+      invalid data types, or failing validation rules (e.g., weak password, invalid email format).
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "Invalid input: 'email' must be a valid email address."
+          required:
+            - error
+
+  '401':
+    $ref: '../../_components/responses/unauthorized.yaml'
+  '403':
+    $ref: '../../_components/responses/forbidden.yaml'
+  '404':
+    $ref: '../../_components/responses/not-found.yaml'
+  '409':
+    $ref: '../../_components/responses/conflict.yaml'

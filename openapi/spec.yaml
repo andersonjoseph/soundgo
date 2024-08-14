@@ -1,0 +1,57 @@
+openapi: 3.0.3
+servers:
+  - url: http://0.0.0.0:8080
+    description: Local development server
+
+info:
+  version: 0.0.1
+  title: SoundGo API
+  contact:
+    email: andersonjoseph@mailfence.com
+    url: 'https://anderjoseph.com'
+    name: Anderson Joseph
+  license:
+    name: WTFPL
+    url: 'http://www.wtfpl.net'
+  description: |
+    # SoundGo API
+    Welcome to the SoundGo API documentation.
+
+tags:
+  - name: User
+    description: Operations related to user management, including creating and updating user accounts.
+  - name: Session
+    description: Operations related to session management, such as creating and deleting sessions (user login and logout).
+
+paths:
+  '/users':
+    post:
+      $ref: './users/paths/create-user.yaml'
+  '/users/{id}':
+    patch:
+      $ref: './users/paths/update-user.yaml'
+
+  '/sessions':
+    post:
+      $ref: './sessions/paths/create-session.yaml'
+    delete:
+      $ref: './sessions/paths/delete-session.yaml'
+
+  '/password-reset':
+    post:
+      $ref: './password-reset/paths/create-password-reset-request.yaml'
+    put:
+      $ref: './password-reset/paths/create-password-reset.yaml'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        JWT-based authentication. Include the JWT token in the `Authorization` header as follows:
+        
+        ```
+        Authorization: Bearer <token>
+        ```

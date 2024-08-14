@@ -1,0 +1,14 @@
+description: |
+  Unauthorized - The provided authentication token is missing, expired, or invalid. 
+  This response is returned when the session cannot be deleted due to authentication failure.
+content:
+  application/json:
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Unauthorized: The authentication token is invalid or expired."
+      required:
+        - error
+

@@ -1,0 +1,13 @@
+description: |
+  Not Found - The resource with the specified identifier does not exist in the system.
+  This response indicates that the update operation cannot be performed because the resource was not found.
+content:
+  application/json:
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "resource not found with the provided identifier."
+      required:
+        - error

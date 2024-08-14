@@ -1,0 +1,59 @@
+tags:
+  - User
+
+summary: Create a new user
+
+description: |
+  This operation creates a new user in the system using the provided information. 
+  The request body must include all the necessary details required for creating a user. 
+  If the user is successfully created, the server will return a 201 status code along with the user details. 
+  If there are any issues with the data or if the user already exists, appropriate error responses will be returned.
+
+operationId: createUser
+
+security: []
+
+requestBody:
+  required: true
+  content:
+    application/json:
+      schema:
+        $ref: '../schemas/user-input.yaml'
+
+responses:
+  '201':
+    description: User created successfully
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/user.yaml'
+
+  '400':
+    description: |
+      Bad request - The input provided is invalid. This can happen due to missing required fields, 
+      invalid data types, or failing validation rules (e.g., weak password, invalid email format).
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "Invalid input: 'email' must be a valid email address."
+          required:
+            - error
+
+  '409':
+    description: |
+      Conflict - A user with the provided details (e.g., username or email) already exists in the system. 
+      This response indicates that the user cannot be created with the given information.
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "User already exists with the email 'johndoe@example.com'."
+          required:
+            - error

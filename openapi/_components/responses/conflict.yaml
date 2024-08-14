@@ -1,0 +1,12 @@
+description: |
+  Conflict - A resource with the provided details already exists in the system.
+content:
+  application/json:
+    schema:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "resource already exists"
+      required:
+        - error

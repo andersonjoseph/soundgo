@@ -1,0 +1,12 @@
+  description: |
+    Forbidden - The user does not have permission to perform this operation. 
+  content:
+    application/json:
+      schema:
+        type: object
+        properties:
+          error:
+            type: string
+            example: "You do not have permission to access/update this information."
+        required:
+          - error

@@ -1,0 +1,8 @@
+.dockerignore
+docker-compose.yaml
+test-docker-compose.yaml
+.gitignore
+.air.toml
+.git
+.git/
+Makefile

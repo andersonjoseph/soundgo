@@ -1,0 +1,19 @@
+tags:
+  - Session
+
+summary: Delete a session
+
+description: |
+  This operation logs the user out by deleting the current session.
+
+operationId: deleteSession
+
+security:
+  - bearerAuth: []
+
+responses:
+  '204':
+    description: Session deleted successfully. No content is returned as the response.
+
+  '401':
+    $ref: '../../_components/responses/unauthorized.yaml'
