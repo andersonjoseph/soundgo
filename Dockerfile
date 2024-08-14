@@ -7,9 +7,9 @@ ENV SHELL "bash"
 
 SHELL ["/bin/bash", "-c"]
 
-# COPY go.mod go.sum ./
+COPY go.mod ./
 
-# RUN go mod download && go mod verify
+RUN go mod download && go mod verify
 
 COPY . .
 
@@ -28,3 +28,6 @@ ENV PATH "/root/.nvm/versions/node/v${NODE_VERSION}/bin/:${PATH}"
 
 # install redocly cly (https://redocly.com/docs/cli/)
 RUN npm i -g @redocly/cli@latest
+
+# install ogen (https://github.com/ogen-go/ogen)
+RUN go get -d github.com/ogen-go/ogen
