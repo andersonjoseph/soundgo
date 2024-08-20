@@ -61,6 +61,27 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				break
 			}
 			switch elem[0] {
+			case 'h': // Prefix: "health"
+				origElem := elem
+				if l := len("health"); len(elem) >= l && elem[0:l] == "health" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					// Leaf node.
+					switch r.Method {
+					case "GET":
+						s.handleCheckHealthRequest([0]string{}, elemIsEscaped, w, r)
+					default:
+						s.notAllowed(w, r, "GET")
+					}
+
+					return
+				}
+
+				elem = origElem
 			case 'p': // Prefix: "password-reset"
 				origElem := elem
 				if l := len("password-reset"); len(elem) >= l && elem[0:l] == "password-reset" {
@@ -73,7 +94,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 					// Leaf node.
 					switch r.Method {
 					case "POST":
-						s.handleCreatePasswordResetRequest([0]string{}, elemIsEscaped, w, r)
+						s.handleCreatePasswordResetRequestRequest([0]string{}, elemIsEscaped, w, r)
 					case "PUT":
 						s.handleResetPasswordRequest([0]string{}, elemIsEscaped, w, r)
 					default:
@@ -252,6 +273,31 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 				break
 			}
 			switch elem[0] {
+			case 'h': // Prefix: "health"
+				origElem := elem
+				if l := len("health"); len(elem) >= l && elem[0:l] == "health" {
+					elem = elem[l:]
+				} else {
+					break
+				}
+
+				if len(elem) == 0 {
+					// Leaf node.
+					switch method {
+					case "GET":
+						r.name = "CheckHealth"
+						r.summary = "Check the health status of the API"
+						r.operationID = "checkHealth"
+						r.pathPattern = "/health"
+						r.args = args
+						r.count = 0
+						return r, true
+					default:
+						return
+					}
+				}
+
+				elem = origElem
 			case 'p': // Prefix: "password-reset"
 				origElem := elem
 				if l := len("password-reset"); len(elem) >= l && elem[0:l] == "password-reset" {
@@ -264,9 +310,9 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 					// Leaf node.
 					switch method {
 					case "POST":
-						r.name = "CreatePasswordReset"
+						r.name = "CreatePasswordResetRequest"
 						r.summary = "Request a password reset"
-						r.operationID = "createPasswordReset"
+						r.operationID = "createPasswordResetRequest"
 						r.pathPattern = "/password-reset"
 						r.args = args
 						r.count = 0

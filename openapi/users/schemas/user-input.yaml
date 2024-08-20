@@ -9,7 +9,8 @@ properties:
   username:
     type: string
     minLength: 3
-    maxLength: 32
+    maxLength: 16
+    pattern: '^(?=.{3,16}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$'
   email:
     type: string
     format: email

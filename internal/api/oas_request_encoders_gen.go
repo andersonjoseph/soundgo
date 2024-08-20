@@ -11,7 +11,7 @@ import (
 	ht "github.com/ogen-go/ogen/http"
 )
 
-func encodeCreatePasswordResetRequest(
+func encodeCreatePasswordResetRequestRequest(
 	req *PasswordResetRequestInput,
 	r *http.Request,
 ) error {

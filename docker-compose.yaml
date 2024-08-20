@@ -1,15 +1,94 @@
 services:
+  # TEST DEVELOPMENT
   soundgo_env:
     profiles: [dev]
     container_name: soundgo_env
     tty: true
     stdin_open: true
     image: soundgo:0.0.1
+    links:
+      - db
+    depends_on:
+      - db
     build:
       context: .
     volumes:
       - .:/usr/src/app
       - ~/.cache:/root/.cache/go-build
       - ~/go/pkg/mod:/go/pkg/mod
+    environment:
+      DB_USER: user
+      DB_PORT: 5432
+      DB_PASSWORD: password
+      DB_NAME: soundgo
+      DB_HOST: db
+      GOOSE_DRIVER: postgres 
+      GOOSE_DBSTRING: user=user password=password dbname=soundgo port=5432 host=db
+      PORT: 8000
     ports:
+      - 8000:8000
       - 8080:8080
+  db:
+    profiles: [dev]
+    image: postgres:16-alpine
+    restart: always
+    shm_size: 128mb
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: soundgo
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-d", "soundgo_test"]
+      interval: 5s
+      timeout: 60s
+
+  # TEST ENVIRONMENT
+  soundgo_test:
+    profiles: [test]
+    container_name: soundgo_test
+    tty: true
+    stdin_open: true
+    image: soundgo:0.0.1
+    links:
+      - test_db
+    depends_on:
+      - test_db
+    build:
+      context: .
+    volumes:
+      - .:/usr/src/app
+      - ~/.cache:/root/.cache/go-build
+      - ~/go/pkg/mod:/go/pkg/mod
+    healthcheck:
+      test: curl -f http://soundgo_test:8001/health || exit 1
+      interval: 1s
+      start_period: 3s
+      timeout: 60s
+      retries: 30
+    environment:
+      DB_USER: user
+      DB_PORT: 5432
+      DB_PASSWORD: password
+      DB_NAME: soundgo_test
+      DB_HOST: test_db
+      GOOSE_DRIVER: postgres 
+      GOOSE_DBSTRING: user=user dbname=soundgo_test password=password port=5432 host=test_db
+      PORT: 8001
+    command: [ 'go', 'run', './cmd/main/main.go']
+    ports:
+      - 8001:8001
+
+  test_db:
+    profiles: [test]
+    image: postgres:16-alpine
+    restart: always
+    shm_size: 128mb
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: soundgo_test
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-d", "soundgo_test"]
+      interval: 1s
+      timeout: 30s
+      retries: 30

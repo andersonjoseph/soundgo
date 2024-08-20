@@ -24,13 +24,21 @@ import (
 
 // Invoker invokes operations described by OpenAPI v3 specification.
 type Invoker interface {
-	// CreatePasswordReset invokes createPasswordReset operation.
+	// CheckHealth invokes checkHealth operation.
+	//
+	// This operation checks the health status of the API and returns a 200 status code
+	// if the API is functioning correctly. This can be used as a health check endpoint
+	// for monitoring purposes.
+	//
+	// GET /health
+	CheckHealth(ctx context.Context) (CheckHealthRes, error)
+	// CreatePasswordResetRequest invokes createPasswordResetRequest operation.
 	//
 	// This operation initiates a password reset process by creating a password reset request.
 	// If the provided email is associated with a user account, an email with password reset code is sent.
 	//
 	// POST /password-reset
-	CreatePasswordReset(ctx context.Context, request *PasswordResetRequestInput) (CreatePasswordResetRes, error)
+	CreatePasswordResetRequest(ctx context.Context, request *PasswordResetRequestInput) (CreatePasswordResetRequestRes, error)
 	// CreateSession invokes createSession operation.
 	//
 	// This operation creates a new session (user login).
@@ -127,20 +135,94 @@ func (c *Client) requestURL(ctx context.Context) *url.URL {
 	return u
 }
 
-// CreatePasswordReset invokes createPasswordReset operation.
+// CheckHealth invokes checkHealth operation.
+//
+// This operation checks the health status of the API and returns a 200 status code
+// if the API is functioning correctly. This can be used as a health check endpoint
+// for monitoring purposes.
+//
+// GET /health
+func (c *Client) CheckHealth(ctx context.Context) (CheckHealthRes, error) {
+	res, err := c.sendCheckHealth(ctx)
+	return res, err
+}
+
+func (c *Client) sendCheckHealth(ctx context.Context) (res CheckHealthRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("checkHealth"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/health"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "CheckHealth",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/health"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeCheckHealthResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// CreatePasswordResetRequest invokes createPasswordResetRequest operation.
 //
 // This operation initiates a password reset process by creating a password reset request.
 // If the provided email is associated with a user account, an email with password reset code is sent.
 //
 // POST /password-reset
-func (c *Client) CreatePasswordReset(ctx context.Context, request *PasswordResetRequestInput) (CreatePasswordResetRes, error) {
-	res, err := c.sendCreatePasswordReset(ctx, request)
+func (c *Client) CreatePasswordResetRequest(ctx context.Context, request *PasswordResetRequestInput) (CreatePasswordResetRequestRes, error) {
+	res, err := c.sendCreatePasswordResetRequest(ctx, request)
 	return res, err
 }
 
-func (c *Client) sendCreatePasswordReset(ctx context.Context, request *PasswordResetRequestInput) (res CreatePasswordResetRes, err error) {
+func (c *Client) sendCreatePasswordResetRequest(ctx context.Context, request *PasswordResetRequestInput) (res CreatePasswordResetRequestRes, err error) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("createPasswordReset"),
+		otelogen.OperationID("createPasswordResetRequest"),
 		semconv.HTTPMethodKey.String("POST"),
 		semconv.HTTPRouteKey.String("/password-reset"),
 	}
@@ -157,7 +239,7 @@ func (c *Client) sendCreatePasswordReset(ctx context.Context, request *PasswordR
 	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "CreatePasswordReset",
+	ctx, span := c.cfg.Tracer.Start(ctx, "CreatePasswordResetRequest",
 		trace.WithAttributes(otelAttrs...),
 		clientSpanKind,
 	)
@@ -183,7 +265,7 @@ func (c *Client) sendCreatePasswordReset(ctx context.Context, request *PasswordR
 	if err != nil {
 		return res, errors.Wrap(err, "create request")
 	}
-	if err := encodeCreatePasswordResetRequest(request, r); err != nil {
+	if err := encodeCreatePasswordResetRequestRequest(request, r); err != nil {
 		return res, errors.Wrap(err, "encode request")
 	}
 
@@ -195,7 +277,7 @@ func (c *Client) sendCreatePasswordReset(ctx context.Context, request *PasswordR
 	defer resp.Body.Close()
 
 	stage = "DecodeResponse"
-	result, err := decodeCreatePasswordResetResponse(resp)
+	result, err := decodeCreatePasswordResetRequestResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

@@ -15,7 +15,7 @@ import (
 	"github.com/ogen-go/ogen/validate"
 )
 
-func (s *Server) decodeCreatePasswordResetRequest(r *http.Request) (
+func (s *Server) decodeCreatePasswordResetRequestRequest(r *http.Request) (
 	req *PasswordResetRequestInput,
 	close func() error,
 	rerr error,

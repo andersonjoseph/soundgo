@@ -23,7 +23,17 @@ tags:
   - name: Session
     description: Operations related to session management, such as creating and deleting sessions (user login and logout).
 
+  - name: Health
+    description: |
+      The Health tag encompasses endpoints that are used to monitor and check the operational 
+      status of the API. These endpoints are typically used by monitoring systems to ensure 
+      that the API is running smoothly and to detect any potential issues.
+
 paths:
+  '/health':
+    get:
+      $ref: './health/paths/check-health.yaml'
+
   '/users':
     post:
       $ref: './users/paths/create-user.yaml'

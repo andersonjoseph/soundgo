@@ -4,6 +4,8 @@ package api
 
 import (
 	"time"
+
+	"github.com/go-faster/errors"
 )
 
 type BearerAuth struct {
@@ -18,6 +20,126 @@ func (s *BearerAuth) GetToken() string {
 // SetToken sets the value of Token.
 func (s *BearerAuth) SetToken(val string) {
 	s.Token = val
+}
+
+type CheckHealthOK struct {
+	// The current health status of the API. It will return "healthy" if
+	// the API is functioning properly, and "unhealthy" otherwise.
+	Status CheckHealthOKStatus `json:"status"`
+}
+
+// GetStatus returns the value of Status.
+func (s *CheckHealthOK) GetStatus() CheckHealthOKStatus {
+	return s.Status
+}
+
+// SetStatus sets the value of Status.
+func (s *CheckHealthOK) SetStatus(val CheckHealthOKStatus) {
+	s.Status = val
+}
+
+func (*CheckHealthOK) checkHealthRes() {}
+
+// The current health status of the API. It will return "healthy" if
+// the API is functioning properly, and "unhealthy" otherwise.
+type CheckHealthOKStatus string
+
+const (
+	CheckHealthOKStatusHealthy   CheckHealthOKStatus = "healthy"
+	CheckHealthOKStatusUnhealthy CheckHealthOKStatus = "unhealthy"
+)
+
+// AllValues returns all CheckHealthOKStatus values.
+func (CheckHealthOKStatus) AllValues() []CheckHealthOKStatus {
+	return []CheckHealthOKStatus{
+		CheckHealthOKStatusHealthy,
+		CheckHealthOKStatusUnhealthy,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s CheckHealthOKStatus) MarshalText() ([]byte, error) {
+	switch s {
+	case CheckHealthOKStatusHealthy:
+		return []byte(s), nil
+	case CheckHealthOKStatusUnhealthy:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *CheckHealthOKStatus) UnmarshalText(data []byte) error {
+	switch CheckHealthOKStatus(data) {
+	case CheckHealthOKStatusHealthy:
+		*s = CheckHealthOKStatusHealthy
+		return nil
+	case CheckHealthOKStatusUnhealthy:
+		*s = CheckHealthOKStatusUnhealthy
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type CheckHealthServiceUnavailable struct {
+	// The current health status of the API.
+	Status CheckHealthServiceUnavailableStatus `json:"status"`
+}
+
+// GetStatus returns the value of Status.
+func (s *CheckHealthServiceUnavailable) GetStatus() CheckHealthServiceUnavailableStatus {
+	return s.Status
+}
+
+// SetStatus sets the value of Status.
+func (s *CheckHealthServiceUnavailable) SetStatus(val CheckHealthServiceUnavailableStatus) {
+	s.Status = val
+}
+
+func (*CheckHealthServiceUnavailable) checkHealthRes() {}
+
+// The current health status of the API.
+type CheckHealthServiceUnavailableStatus string
+
+const (
+	CheckHealthServiceUnavailableStatusHealthy   CheckHealthServiceUnavailableStatus = "healthy"
+	CheckHealthServiceUnavailableStatusUnhealthy CheckHealthServiceUnavailableStatus = "unhealthy"
+)
+
+// AllValues returns all CheckHealthServiceUnavailableStatus values.
+func (CheckHealthServiceUnavailableStatus) AllValues() []CheckHealthServiceUnavailableStatus {
+	return []CheckHealthServiceUnavailableStatus{
+		CheckHealthServiceUnavailableStatusHealthy,
+		CheckHealthServiceUnavailableStatusUnhealthy,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s CheckHealthServiceUnavailableStatus) MarshalText() ([]byte, error) {
+	switch s {
+	case CheckHealthServiceUnavailableStatusHealthy:
+		return []byte(s), nil
+	case CheckHealthServiceUnavailableStatusUnhealthy:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *CheckHealthServiceUnavailableStatus) UnmarshalText(data []byte) error {
+	switch CheckHealthServiceUnavailableStatus(data) {
+	case CheckHealthServiceUnavailableStatusHealthy:
+		*s = CheckHealthServiceUnavailableStatusHealthy
+		return nil
+	case CheckHealthServiceUnavailableStatusUnhealthy:
+		*s = CheckHealthServiceUnavailableStatusUnhealthy
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
 }
 
 type Conflict struct {
@@ -36,26 +158,26 @@ func (s *Conflict) SetError(val string) {
 
 func (*Conflict) updateUserRes() {}
 
-type CreatePasswordResetBadRequest struct {
+type CreatePasswordResetRequestBadRequest struct {
 	Error string `json:"error"`
 }
 
 // GetError returns the value of Error.
-func (s *CreatePasswordResetBadRequest) GetError() string {
+func (s *CreatePasswordResetRequestBadRequest) GetError() string {
 	return s.Error
 }
 
 // SetError sets the value of Error.
-func (s *CreatePasswordResetBadRequest) SetError(val string) {
+func (s *CreatePasswordResetRequestBadRequest) SetError(val string) {
 	s.Error = val
 }
 
-func (*CreatePasswordResetBadRequest) createPasswordResetRes() {}
+func (*CreatePasswordResetRequestBadRequest) createPasswordResetRequestRes() {}
 
-// CreatePasswordResetNoContent is response for CreatePasswordReset operation.
-type CreatePasswordResetNoContent struct{}
+// CreatePasswordResetRequestNoContent is response for CreatePasswordResetRequest operation.
+type CreatePasswordResetRequestNoContent struct{}
 
-func (*CreatePasswordResetNoContent) createPasswordResetRes() {}
+func (*CreatePasswordResetRequestNoContent) createPasswordResetRequestRes() {}
 
 type CreateUserBadRequest struct {
 	Error string `json:"error"`
@@ -125,98 +247,6 @@ func (s *NotFound) SetError(val string) {
 }
 
 func (*NotFound) updateUserRes() {}
-
-// NewOptDateTime returns new OptDateTime with value set to v.
-func NewOptDateTime(v time.Time) OptDateTime {
-	return OptDateTime{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptDateTime is optional time.Time.
-type OptDateTime struct {
-	Value time.Time
-	Set   bool
-}
-
-// IsSet returns true if OptDateTime was set.
-func (o OptDateTime) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptDateTime) Reset() {
-	var v time.Time
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptDateTime) SetTo(v time.Time) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptDateTime) Get() (v time.Time, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptDateTime) Or(d time.Time) time.Time {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
-// NewOptString returns new OptString with value set to v.
-func NewOptString(v string) OptString {
-	return OptString{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptString is optional string.
-type OptString struct {
-	Value string
-	Set   bool
-}
-
-// IsSet returns true if OptString was set.
-func (o OptString) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptString) Reset() {
-	var v string
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptString) SetTo(v string) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptString) Get() (v string, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptString) Or(d string) string {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
 
 // Ref: #/components/schemas/password-reset-input
 type PasswordResetInput struct {
@@ -293,16 +323,16 @@ func (*ResetPasswordNoContent) resetPasswordRes() {}
 
 // Ref: #/components/schemas/session
 type Session struct {
-	Token OptString `json:"token"`
+	Token string `json:"token"`
 }
 
 // GetToken returns the value of Token.
-func (s *Session) GetToken() OptString {
+func (s *Session) GetToken() string {
 	return s.Token
 }
 
 // SetToken sets the value of Token.
-func (s *Session) SetToken(val OptString) {
+func (s *Session) SetToken(val string) {
 	s.Token = val
 }
 
@@ -385,49 +415,49 @@ func (s *UpdateUserInput) SetUsername(val string) {
 
 // Ref: #/components/schemas/user
 type User struct {
-	ID        OptString   `json:"id"`
-	Username  OptString   `json:"username"`
-	Email     OptString   `json:"email"`
-	CreatedAt OptDateTime `json:"createdAt"`
+	ID        string    `json:"id"`
+	Username  string    `json:"username"`
+	Email     string    `json:"email"`
+	CreatedAt time.Time `json:"createdAt"`
 }
 
 // GetID returns the value of ID.
-func (s *User) GetID() OptString {
+func (s *User) GetID() string {
 	return s.ID
 }
 
 // GetUsername returns the value of Username.
-func (s *User) GetUsername() OptString {
+func (s *User) GetUsername() string {
 	return s.Username
 }
 
 // GetEmail returns the value of Email.
-func (s *User) GetEmail() OptString {
+func (s *User) GetEmail() string {
 	return s.Email
 }
 
 // GetCreatedAt returns the value of CreatedAt.
-func (s *User) GetCreatedAt() OptDateTime {
+func (s *User) GetCreatedAt() time.Time {
 	return s.CreatedAt
 }
 
 // SetID sets the value of ID.
-func (s *User) SetID(val OptString) {
+func (s *User) SetID(val string) {
 	s.ID = val
 }
 
 // SetUsername sets the value of Username.
-func (s *User) SetUsername(val OptString) {
+func (s *User) SetUsername(val string) {
 	s.Username = val
 }
 
 // SetEmail sets the value of Email.
-func (s *User) SetEmail(val OptString) {
+func (s *User) SetEmail(val string) {
 	s.Email = val
 }
 
 // SetCreatedAt sets the value of CreatedAt.
-func (s *User) SetCreatedAt(val OptDateTime) {
+func (s *User) SetCreatedAt(val time.Time) {
 	s.CreatedAt = val
 }
 

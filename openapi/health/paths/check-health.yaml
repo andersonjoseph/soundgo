@@ -1,0 +1,51 @@
+tags:
+  - Health
+
+summary: Check the health status of the API
+
+description: |
+  This operation checks the health status of the API and returns a 200 status code 
+  if the API is functioning correctly. This can be used as a health check endpoint 
+  for monitoring purposes.
+
+operationId: checkHealth
+
+security: []
+
+responses:
+  '200':
+    description: The API is healthy and operational.
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - status
+          properties:
+            status:
+              type: string
+              enum:
+                - healthy
+                - unhealthy
+              description: |
+                The current health status of the API. It will return "healthy" if 
+                the API is functioning properly, and "unhealthy" otherwise.
+          example:
+            status: healthy
+  '503':
+    description: The API is currently unavailable or unhealthy.
+    content:
+      application/json:
+        schema:
+          type: object
+          required:
+            - status
+          properties:
+            status:
+              type: string
+              enum:
+                - healthy
+                - unhealthy
+              description: The current health status of the API.
+          example:
+            status: unhealthy

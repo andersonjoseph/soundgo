@@ -7,7 +7,9 @@ ENV SHELL "bash"
 
 SHELL ["/bin/bash", "-c"]
 
-COPY go.mod ./
+RUN apt update
+
+COPY go.mod go.sum ./
 
 RUN go mod download && go mod verify
 
@@ -31,3 +33,9 @@ RUN npm i -g @redocly/cli@latest
 
 # install ogen (https://github.com/ogen-go/ogen)
 RUN go get -d github.com/ogen-go/ogen@v1.2.2
+
+# install hurl (https://hurl.dev)
+RUN npm i -g @orangeopensource/hurl && apt install -y libxml2
+
+# install goose (https://github.com/pressly/goose)
+RUN go install github.com/pressly/goose/v3/cmd/goose@latest

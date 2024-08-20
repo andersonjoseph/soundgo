@@ -20,21 +20,116 @@ import (
 	"github.com/ogen-go/ogen/otelogen"
 )
 
-// handleCreatePasswordResetRequest handles createPasswordReset operation.
+// handleCheckHealthRequest handles checkHealth operation.
+//
+// This operation checks the health status of the API and returns a 200 status code
+// if the API is functioning correctly. This can be used as a health check endpoint
+// for monitoring purposes.
+//
+// GET /health
+func (s *Server) handleCheckHealthRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("checkHealth"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/health"),
+	}
+
+	// Start a span for this request.
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "CheckHealth",
+		trace.WithAttributes(otelAttrs...),
+		serverSpanKind,
+	)
+	defer span.End()
+
+	// Add Labeler to context.
+	labeler := &Labeler{attrs: otelAttrs}
+	ctx = contextWithLabeler(ctx, labeler)
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		elapsedDuration := time.Since(startTime)
+		attrOpt := metric.WithAttributeSet(labeler.AttributeSet())
+
+		// Increment request counter.
+		s.requests.Add(ctx, 1, attrOpt)
+
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		s.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), attrOpt)
+	}()
+
+	var (
+		recordError = func(stage string, err error) {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			s.errors.Add(ctx, 1, metric.WithAttributeSet(labeler.AttributeSet()))
+		}
+		err error
+	)
+
+	var response CheckHealthRes
+	if m := s.cfg.Middleware; m != nil {
+		mreq := middleware.Request{
+			Context:          ctx,
+			OperationName:    "CheckHealth",
+			OperationSummary: "Check the health status of the API",
+			OperationID:      "checkHealth",
+			Body:             nil,
+			Params:           middleware.Parameters{},
+			Raw:              r,
+		}
+
+		type (
+			Request  = struct{}
+			Params   = struct{}
+			Response = CheckHealthRes
+		)
+		response, err = middleware.HookMiddleware[
+			Request,
+			Params,
+			Response,
+		](
+			m,
+			mreq,
+			nil,
+			func(ctx context.Context, request Request, params Params) (response Response, err error) {
+				response, err = s.h.CheckHealth(ctx)
+				return response, err
+			},
+		)
+	} else {
+		response, err = s.h.CheckHealth(ctx)
+	}
+	if err != nil {
+		defer recordError("Internal", err)
+		s.cfg.ErrorHandler(ctx, w, r, err)
+		return
+	}
+
+	if err := encodeCheckHealthResponse(response, w, span); err != nil {
+		defer recordError("EncodeResponse", err)
+		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
+			s.cfg.ErrorHandler(ctx, w, r, err)
+		}
+		return
+	}
+}
+
+// handleCreatePasswordResetRequestRequest handles createPasswordResetRequest operation.
 //
 // This operation initiates a password reset process by creating a password reset request.
 // If the provided email is associated with a user account, an email with password reset code is sent.
 //
 // POST /password-reset
-func (s *Server) handleCreatePasswordResetRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleCreatePasswordResetRequestRequest(args [0]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("createPasswordReset"),
+		otelogen.OperationID("createPasswordResetRequest"),
 		semconv.HTTPMethodKey.String("POST"),
 		semconv.HTTPRouteKey.String("/password-reset"),
 	}
 
 	// Start a span for this request.
-	ctx, span := s.cfg.Tracer.Start(r.Context(), "CreatePasswordReset",
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "CreatePasswordResetRequest",
 		trace.WithAttributes(otelAttrs...),
 		serverSpanKind,
 	)
@@ -65,11 +160,11 @@ func (s *Server) handleCreatePasswordResetRequest(args [0]string, argsEscaped bo
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
-			Name: "CreatePasswordReset",
-			ID:   "createPasswordReset",
+			Name: "CreatePasswordResetRequest",
+			ID:   "createPasswordResetRequest",
 		}
 	)
-	request, close, err := s.decodeCreatePasswordResetRequest(r)
+	request, close, err := s.decodeCreatePasswordResetRequestRequest(r)
 	if err != nil {
 		err = &ogenerrors.DecodeRequestError{
 			OperationContext: opErrContext,
@@ -85,13 +180,13 @@ func (s *Server) handleCreatePasswordResetRequest(args [0]string, argsEscaped bo
 		}
 	}()
 
-	var response CreatePasswordResetRes
+	var response CreatePasswordResetRequestRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
-			OperationName:    "CreatePasswordReset",
+			OperationName:    "CreatePasswordResetRequest",
 			OperationSummary: "Request a password reset",
-			OperationID:      "createPasswordReset",
+			OperationID:      "createPasswordResetRequest",
 			Body:             request,
 			Params:           middleware.Parameters{},
 			Raw:              r,
@@ -100,7 +195,7 @@ func (s *Server) handleCreatePasswordResetRequest(args [0]string, argsEscaped bo
 		type (
 			Request  = *PasswordResetRequestInput
 			Params   = struct{}
-			Response = CreatePasswordResetRes
+			Response = CreatePasswordResetRequestRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -111,12 +206,12 @@ func (s *Server) handleCreatePasswordResetRequest(args [0]string, argsEscaped bo
 			mreq,
 			nil,
 			func(ctx context.Context, request Request, params Params) (response Response, err error) {
-				response, err = s.h.CreatePasswordReset(ctx, request)
+				response, err = s.h.CreatePasswordResetRequest(ctx, request)
 				return response, err
 			},
 		)
 	} else {
-		response, err = s.h.CreatePasswordReset(ctx, request)
+		response, err = s.h.CreatePasswordResetRequest(ctx, request)
 	}
 	if err != nil {
 		defer recordError("Internal", err)
@@ -124,7 +219,7 @@ func (s *Server) handleCreatePasswordResetRequest(args [0]string, argsEscaped bo
 		return
 	}
 
-	if err := encodeCreatePasswordResetResponse(response, w, span); err != nil {
+	if err := encodeCreatePasswordResetRequestResponse(response, w, span); err != nil {
 		defer recordError("EncodeResponse", err)
 		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
 			s.cfg.ErrorHandler(ctx, w, r, err)

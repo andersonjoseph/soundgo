@@ -13,13 +13,24 @@ type UnimplementedHandler struct{}
 
 var _ Handler = UnimplementedHandler{}
 
-// CreatePasswordReset implements createPasswordReset operation.
+// CheckHealth implements checkHealth operation.
+//
+// This operation checks the health status of the API and returns a 200 status code
+// if the API is functioning correctly. This can be used as a health check endpoint
+// for monitoring purposes.
+//
+// GET /health
+func (UnimplementedHandler) CheckHealth(ctx context.Context) (r CheckHealthRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// CreatePasswordResetRequest implements createPasswordResetRequest operation.
 //
 // This operation initiates a password reset process by creating a password reset request.
 // If the provided email is associated with a user account, an email with password reset code is sent.
 //
 // POST /password-reset
-func (UnimplementedHandler) CreatePasswordReset(ctx context.Context, req *PasswordResetRequestInput) (r CreatePasswordResetRes, _ error) {
+func (UnimplementedHandler) CreatePasswordResetRequest(ctx context.Context, req *PasswordResetRequestInput) (r CreatePasswordResetRequestRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

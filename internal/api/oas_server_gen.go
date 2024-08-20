@@ -8,13 +8,21 @@ import (
 
 // Handler handles operations described by OpenAPI v3 specification.
 type Handler interface {
-	// CreatePasswordReset implements createPasswordReset operation.
+	// CheckHealth implements checkHealth operation.
+	//
+	// This operation checks the health status of the API and returns a 200 status code
+	// if the API is functioning correctly. This can be used as a health check endpoint
+	// for monitoring purposes.
+	//
+	// GET /health
+	CheckHealth(ctx context.Context) (CheckHealthRes, error)
+	// CreatePasswordResetRequest implements createPasswordResetRequest operation.
 	//
 	// This operation initiates a password reset process by creating a password reset request.
 	// If the provided email is associated with a user account, an email with password reset code is sent.
 	//
 	// POST /password-reset
-	CreatePasswordReset(ctx context.Context, req *PasswordResetRequestInput) (CreatePasswordResetRes, error)
+	CreatePasswordResetRequest(ctx context.Context, req *PasswordResetRequestInput) (CreatePasswordResetRequestRes, error)
 	// CreateSession implements createSession operation.
 	//
 	// This operation creates a new session (user login).

@@ -1,3 +1,6 @@
+build-env:
+	docker compose --profile dev build
+
 start-env:
 	docker compose --profile dev up -d --wait
 
@@ -12,3 +15,28 @@ preview-docs:
 
 generate-openapi:
 	docker compose exec soundgo_env bash -c 'redocly lint ./openapi/spec.yaml && redocly bundle -o ./openapi/spec.bundle.yaml ./openapi/spec.yaml && go generate ./open-api-gen.go'
+
+fmt:
+	docker compose exec soundgo_env go fmt ./... 
+
+create-migration:
+	@if [ -z "$(name)" ]; then \
+			echo "Error: Please provide a migration name. Usage: make create-migration name=<migration_name>"; \
+			exit 1; \
+	fi; \
+	docker compose exec soundgo_env goose -dir ./migrations create $(name) sql
+
+test:
+	docker compose --profile test up --wait -d
+	@trap 'docker compose --profile test down -v' EXIT; \
+	docker compose exec soundgo_test goose -dir ./migrations up; \
+	docker compose exec soundgo_test go test -v ./...
+
+e2e-tests:
+	HOST=soundgo_test PORT=8001 bash ./e2e/run.sh
+		
+debug:
+	docker compose --profile test up --wait -d
+	@trap 'docker compose --profile test down -v' EXIT; \
+	docker compose exec soundgo_test goose -dir ./migrations up; \
+	docker compose exec soundgo_test bash
