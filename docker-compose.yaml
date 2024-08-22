@@ -17,17 +17,17 @@ services:
       - ~/.cache:/root/.cache/go-build
       - ~/go/pkg/mod:/go/pkg/mod
     environment:
-      DB_USER: user
-      DB_PORT: 5432
-      DB_PASSWORD: password
-      DB_NAME: soundgo
-      DB_HOST: db
-      GOOSE_DRIVER: postgres 
-      GOOSE_DBSTRING: user=user password=password dbname=soundgo port=5432 host=db
-      JWT_KEY: 6wrKJjEOcCPLw2tG7KqyzZ6IahTO9Oj2BX/mpZOY/ZAYEpPEkH8n3GA4WNTnOvwdwz680MC/r5G5quvhXey9Ww==
-      PORT: 8000
+      DB_USER: ${DB_USER}
+      DB_PORT: ${DB_PORT}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      DB_HOST: ${DB_HOST}
+      GOOSE_DRIVER: ${GOOSE_DRIVER}
+      GOOSE_DBSTRING: ${GOOSE_DBSTRING}
+      JWT_KEY: ${JWT_KEY}
+      PORT: ${PORT}
     ports:
-      - 8000:8000
+      - ${PORT}:${PORT}
       - 8080:8080
   db:
     profiles: [dev]
@@ -35,9 +35,9 @@ services:
     restart: always
     shm_size: 128mb
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: soundgo
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -d soundgo_test"]
       interval: 5s
@@ -61,27 +61,27 @@ services:
       - ~/.cache:/root/.cache/go-build
       - ~/go/pkg/mod:/go/pkg/mod
     environment:
-      DB_USER: user
-      DB_PORT: 5432
-      DB_PASSWORD: password
-      DB_NAME: soundgo_test
-      DB_HOST: test_db
-      GOOSE_DRIVER: postgres 
-      GOOSE_DBSTRING: user=user dbname=soundgo_test password=password port=5432 host=test_db
-      JWT_KEY: 6wrKJjEOcCPLw2tG7KqyzZ6IahTO9Oj2BX/mpZOY/ZAYEpPEkH8n3GA4WNTnOvwdwz680MC/r5G5quvhXey9Ww==
-      PORT: 8001
-      HOST: localhost
+      DB_USER: ${TEST_DB_USER}
+      DB_PORT: ${TEST_DB_PORT}
+      DB_PASSWORD: ${TEST_DB_PASSWORD}
+      DB_NAME: ${TEST_DB_NAME}
+      DB_HOST: ${TEST_DB_HOST}
+      GOOSE_DRIVER: ${GOOSE_DRIVER}
+      GOOSE_DBSTRING: ${TEST_GOOSE_DBSTRING}
+      JWT_KEY: ${JWT_KEY}
+      PORT: ${TEST_PORT}
+      HOST: ${TEST_HOST}
     ports:
-      - 8001:8001
+      - ${TEST_PORT}:${TEST_PORT}
   test_db:
     profiles: [test]
     image: postgres:16-alpine
     restart: always
     shm_size: 128mb
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: soundgo_test
+      POSTGRES_USER: ${TEST_DB_USER}
+      POSTGRES_PASSWORD: ${TEST_DB_PASSWORD}
+      POSTGRES_DB: ${TEST_DB_NAME}
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -d soundgo_test -U user"]
       interval: 1s

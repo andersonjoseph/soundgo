@@ -21,3 +21,6 @@
 go.work
 tmp/
 openapi/spec.bundle.yaml
+
+# env files
+.env

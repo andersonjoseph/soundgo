@@ -1,3 +1,8 @@
+ifneq (,$(wildcard ./.env))
+    include .env
+    export
+endif
+
 build-env:
 	docker compose --profile dev build
 
@@ -33,7 +38,7 @@ test:
 	docker compose exec soundgo_test go test -v ./...
 
 e2e-tests:
-	HOST=soundgo_test PORT=8001 bash ./e2e/run.sh
+	HOST=${TEST_HOST} PORT=${TEST_PORT} bash ./e2e/run.sh
 		
 debug:
 	docker compose --profile test up --wait -d
@@ -48,4 +53,4 @@ request:
 	fi; \
 	docker compose exec soundgo_test goose -dir ./migrations up
 	trap 'docker compose down -v test_db && docker compose up --wait -d test_db' EXIT; \
-	docker compose exec soundgo_test hurl --test --variable HOST=localhost --variable PORT=8001 $(file)
+	docker compose exec soundgo_test hurl --test --variable HOST=${TEST_HOST} --variable PORT=${TEST_PORT} $(file)
