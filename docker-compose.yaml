@@ -70,6 +70,7 @@ services:
       GOOSE_DBSTRING: user=user dbname=soundgo_test password=password port=5432 host=test_db
       JWT_KEY: 6wrKJjEOcCPLw2tG7KqyzZ6IahTO9Oj2BX/mpZOY/ZAYEpPEkH8n3GA4WNTnOvwdwz680MC/r5G5quvhXey9Ww==
       PORT: 8001
+      HOST: localhost
     ports:
       - 8001:8001
   test_db:

@@ -45,7 +45,7 @@ func (r PGRepository) Save(ctx context.Context, i SaveInput) (e Entity, err erro
 func (r PGRepository) Delete(ctx context.Context, ID string) (err error) {
 	query, args, err := psql.
 		Delete("sessions").
-		Where("id", ID).
+		Where("id = ?", ID).
 		ToSql()
 
 	if err != nil {

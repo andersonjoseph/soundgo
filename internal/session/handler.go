@@ -1,12 +1,11 @@
 package session
 
 import (
-	"context"
 	"errors"
-	"fmt"
 	"log/slog"
 
 	"github.com/andersonjoseph/soundgo/internal/api"
+	"github.com/andersonjoseph/soundgo/internal/security"
 	"github.com/andersonjoseph/soundgo/internal/shared"
 	"github.com/andersonjoseph/soundgo/internal/user"
 )
@@ -17,18 +16,26 @@ type Entity struct {
 }
 
 type Handler struct {
-	repository     Repository
-	userRepository user.Repository
-	logger         *slog.Logger
-	hasher         shared.PasswordHasher
+	repository      Repository
+	userRepository  user.Repository
+	logger          *slog.Logger
+	hasher          shared.PasswordHasher
+	securityHandler security.Handler
 }
 
-func NewHandler(repository Repository, userRepository user.Repository, hasher shared.PasswordHasher, logger *slog.Logger) Handler {
+func NewHandler(
+	repository Repository,
+	userRepository user.Repository,
+	hasher shared.PasswordHasher,
+	securityHandler security.Handler,
+	logger *slog.Logger,
+) Handler {
 	return Handler{
-		repository:     repository,
-		userRepository: userRepository,
-		logger:         logger,
-		hasher:         hasher,
+		repository:      repository,
+		userRepository:  userRepository,
+		logger:          logger,
+		hasher:          hasher,
+		securityHandler: securityHandler,
 	}
 }
 
@@ -60,20 +67,4 @@ func (h Handler) handleError(err error) (api.CreateSessionRes, error) {
 		)
 		return nil, err
 	}
-}
-
-// DELETE /sessions
-func (h Handler) DeleteSession(ctx context.Context) (api.DeleteSessionRes, error) {
-	IDVal := ctx.Value("userID")
-
-	ID, ok := IDVal.(string)
-	if !ok {
-		return nil, fmt.Errorf("bad ID")
-	}
-
-	h.logger.Info(
-		"deleting session",
-	)
-
-	return &api.DeleteSessionNoContent{}, h.repository.Delete(ctx, ID)
 }

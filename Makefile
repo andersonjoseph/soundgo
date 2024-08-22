@@ -39,4 +39,13 @@ debug:
 	docker compose --profile test up --wait -d
 	@trap 'docker compose --profile test down -v' EXIT; \
 	docker compose exec soundgo_test goose -dir ./migrations up; \
-	docker compose exec soundgo_test bash
+	docker compose exec -it soundgo_test bash -c "dlv debug ./cmd/main/main.go"
+
+request:
+	@if [ -z "$(file)" ]; then \
+			echo "Error: Please provide a migration name. Usage: make request file=<hurl_file>"; \
+			exit 1; \
+	fi; \
+	docker compose exec soundgo_test goose -dir ./migrations up
+	trap 'docker compose down -v test_db && docker compose up --wait -d test_db' EXIT; \
+	docker compose exec soundgo_test hurl --test --variable HOST=localhost --variable PORT=8001 $(file)

@@ -10,11 +10,14 @@ import (
 	"github.com/andersonjoseph/soundgo/internal/api"
 	"github.com/andersonjoseph/soundgo/internal/health"
 	"github.com/andersonjoseph/soundgo/internal/password"
+	"github.com/andersonjoseph/soundgo/internal/security"
 	"github.com/andersonjoseph/soundgo/internal/session"
 	"github.com/andersonjoseph/soundgo/internal/shared"
 	"github.com/andersonjoseph/soundgo/internal/user"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
+
+type SecurityHandler = security.Handler
 
 type UserHandler = user.Handler
 type SessionHandler = session.Handler
@@ -26,12 +29,6 @@ type serverHandler struct {
 	PasswordHandler
 	SessionHandler
 	HealthHandler
-}
-
-type securityHandler struct{}
-
-func (h securityHandler) HandleBearerAuth(ctx context.Context, operationName string, t api.BearerAuth) (context.Context, error) {
-	return context.TODO(), nil
 }
 
 func getPGURL() (string, error) {
@@ -88,6 +85,7 @@ func main() {
 	defer pool.Close()
 
 	hasher := shared.ScryptHasher{}
+	securityHandler := security.NewHandler(logger)
 
 	h := serverHandler{
 		UserHandler: user.NewHandler(
@@ -99,11 +97,12 @@ func main() {
 			session.NewPGRepository(pool),
 			user.NewPGRepository(pool),
 			hasher,
+			securityHandler,
 			logger,
 		),
 	}
 
-	srv, err := api.NewServer(h, securityHandler{})
+	srv, err := api.NewServer(h, securityHandler)
 	if err != nil {
 		logger.Error("error creating app server", "error", err)
 		os.Exit(1)
