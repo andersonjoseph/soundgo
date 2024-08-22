@@ -78,7 +78,7 @@ func getDBConnection() (*pgxpool.Pool, error) {
 }
 
 func main() {
-	logger := slog.New(slog.Default().Handler())
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 
 	pool, err := getDBConnection()
 	if err != nil {
@@ -87,11 +87,19 @@ func main() {
 	}
 	defer pool.Close()
 
+	hasher := shared.ScryptHasher{}
+
 	h := serverHandler{
 		UserHandler: user.NewHandler(
 			user.NewPGRepository(pool),
 			logger,
-			shared.ScryptHasher{},
+			hasher,
+		),
+		SessionHandler: session.NewHandler(
+			session.NewPGRepository(pool),
+			user.NewPGRepository(pool),
+			hasher,
+			logger,
 		),
 	}
 

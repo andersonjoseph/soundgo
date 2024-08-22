@@ -1,4 +1,4 @@
-# creating user user
+# creating user
 POST http://{{HOST}}:{{PORT}}/users
 {
     "username": "jhondoe",

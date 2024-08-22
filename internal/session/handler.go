@@ -2,6 +2,7 @@ package session
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 
@@ -22,42 +23,43 @@ type Handler struct {
 	hasher         shared.PasswordHasher
 }
 
-func (h Handler) isPasswordValid(ctx context.Context, req *api.SessionInput) bool {
-	u, err := h.userRepository.GetByUsername(ctx, req.Username)
-	if err != nil {
-		return false
+func NewHandler(repository Repository, userRepository user.Repository, hasher shared.PasswordHasher, logger *slog.Logger) Handler {
+	return Handler{
+		repository:     repository,
+		userRepository: userRepository,
+		logger:         logger,
+		hasher:         hasher,
 	}
-
-	return !h.hasher.Compare(u.Password, req.Password)
 }
 
-// POST /sessions
-func (h Handler) CreateSession(ctx context.Context, req *api.SessionInput) (api.CreateSessionRes, error) {
-	h.logger.Info(
-		"creating session",
-		slog.Group(
-			"input",
-			"username",
-			req.Username,
-		),
-	)
-
-	if !h.isPasswordValid(ctx, req) {
+func (h Handler) handleError(err error) (api.CreateSessionRes, error) {
+	switch {
+	case errors.Is(err, shared.ErrUnauthorized):
+		h.logger.Info(
+			"unauthorized",
+			"msg",
+			err.Error(),
+			slog.Group(
+				"http_info",
+				"status",
+				401,
+			),
+		)
 		return &api.Unauthorized{}, nil
-	}
 
-	session, err := h.repository.Save(req.Username, SaveInput{
-		Token: "123",
-	})
-
-	if err != nil {
-		h.logger.Error("error", slog.Group("error", "message", err.Error()))
+	default:
+		h.logger.Info(
+			"internal server error",
+			"msg",
+			err.Error(),
+			slog.Group(
+				"http_info",
+				"status",
+				500,
+			),
+		)
 		return nil, err
 	}
-
-	return &api.Session{
-		Token: session.Token,
-	}, nil
 }
 
 // DELETE /sessions
@@ -73,5 +75,5 @@ func (h Handler) DeleteSession(ctx context.Context) (api.DeleteSessionRes, error
 		"deleting session",
 	)
 
-	return &api.DeleteSessionNoContent{}, h.repository.Delete(ID)
+	return &api.DeleteSessionNoContent{}, h.repository.Delete(ctx, ID)
 }

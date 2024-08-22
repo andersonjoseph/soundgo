@@ -1,10 +1,14 @@
 package session
 
+import "context"
+
 type SaveInput struct {
-	Token string
+	ID     string
+	Token  string
+	UserID string
 }
 
 type Repository interface {
-	Save(username string, i SaveInput) (Entity, error)
-	Delete(ID string) error
+	Save(ctx context.Context, i SaveInput) (Entity, error)
+	Delete(ctx context.Context, ID string) error
 }

@@ -24,6 +24,7 @@ services:
       DB_HOST: db
       GOOSE_DRIVER: postgres 
       GOOSE_DBSTRING: user=user password=password dbname=soundgo port=5432 host=db
+      JWT_KEY: 6wrKJjEOcCPLw2tG7KqyzZ6IahTO9Oj2BX/mpZOY/ZAYEpPEkH8n3GA4WNTnOvwdwz680MC/r5G5quvhXey9Ww==
       PORT: 8000
     ports:
       - 8000:8000
@@ -38,7 +39,7 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: soundgo
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready", "-d", "soundgo_test"]
+      test: ["CMD-SHELL", "pg_isready -d soundgo_test"]
       interval: 5s
       timeout: 60s
 
@@ -59,12 +60,6 @@ services:
       - .:/usr/src/app
       - ~/.cache:/root/.cache/go-build
       - ~/go/pkg/mod:/go/pkg/mod
-    healthcheck:
-      test: curl -f http://soundgo_test:8001/health || exit 1
-      interval: 1s
-      start_period: 3s
-      timeout: 60s
-      retries: 30
     environment:
       DB_USER: user
       DB_PORT: 5432
@@ -73,11 +68,10 @@ services:
       DB_HOST: test_db
       GOOSE_DRIVER: postgres 
       GOOSE_DBSTRING: user=user dbname=soundgo_test password=password port=5432 host=test_db
+      JWT_KEY: 6wrKJjEOcCPLw2tG7KqyzZ6IahTO9Oj2BX/mpZOY/ZAYEpPEkH8n3GA4WNTnOvwdwz680MC/r5G5quvhXey9Ww==
       PORT: 8001
-    command: [ 'go', 'run', './cmd/main/main.go']
     ports:
       - 8001:8001
-
   test_db:
     profiles: [test]
     image: postgres:16-alpine
@@ -88,7 +82,7 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: soundgo_test
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready", "-d", "soundgo_test"]
+      test: ["CMD-SHELL", "pg_isready -d soundgo_test -U user"]
       interval: 1s
       timeout: 30s
       retries: 30
