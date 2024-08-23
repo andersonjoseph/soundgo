@@ -85,19 +85,23 @@ func main() {
 	defer pool.Close()
 
 	hasher := shared.ScryptHasher{}
-	securityHandler := security.NewHandler(logger)
+	userRepo := user.NewPGRepository(pool)
+	sessionRepo := session.NewPGRepository(pool)
+	JWTHandler := shared.JWTHandler{}
+
+	securityHandler := security.NewHandler(sessionRepo, JWTHandler, logger)
 
 	h := serverHandler{
 		UserHandler: user.NewHandler(
-			user.NewPGRepository(pool),
+			userRepo,
 			logger,
 			hasher,
 		),
 		SessionHandler: session.NewHandler(
-			session.NewPGRepository(pool),
-			user.NewPGRepository(pool),
+			sessionRepo,
+			userRepo,
 			hasher,
-			securityHandler,
+			JWTHandler,
 			logger,
 		),
 	}

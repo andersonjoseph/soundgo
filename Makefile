@@ -35,7 +35,7 @@ test:
 	docker compose --profile test up --wait -d
 	@trap 'docker compose --profile test down -v' EXIT; \
 	docker compose exec soundgo_test goose -dir ./migrations up; \
-	docker compose exec soundgo_test go test -v ./...
+	docker compose exec soundgo_test go test ./...
 
 e2e-tests:
 	HOST=${TEST_HOST} PORT=${TEST_PORT} bash ./e2e/run.sh

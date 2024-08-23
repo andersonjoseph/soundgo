@@ -6,6 +6,8 @@ POST http://{{HOST}}:{{PORT}}/users
     "password": "Str0ngp4s$w0rd"
 }
 HTTP 201
+[Captures]
+userID: jsonpath "$.id"
 
 # creating session
 POST http://{{HOST}}:{{PORT}}/sessions
@@ -17,16 +19,17 @@ HTTP 201
 [Captures]
 token: jsonpath "$.token"
 
-# deleting session
-DELETE http://{{HOST}}:{{PORT}}/sessions
+# updating user
+PATCH http://{{HOST}}:{{PORT}}/users/{{userID}}
 Authorization: Bearer {{token}}
-HTTP 204
+{
+    "username": "doejhon"
+}
+HTTP 200
+[Asserts]
+jsonpath "$.id" exists
 
-# deleting session without authorization returns 401
-DELETE http://{{HOST}}:{{PORT}}/sessions
-HTTP 401
+jsonpath "$.username" == "doejhon"
+jsonpath "$.email" == "john@mail.com"
 
-# deleting session without a valid token returns 401
-DELETE http://{{HOST}}:{{PORT}}/sessions
-Authorization: Bearer 123
-HTTP 401
+jsonpath "$.password" not exists

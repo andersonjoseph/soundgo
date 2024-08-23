@@ -11,4 +11,5 @@ type SaveInput struct {
 type Repository interface {
 	Save(ctx context.Context, i SaveInput) (Entity, error)
 	Delete(ctx context.Context, ID string) error
+	GetByID(ctx context.Context, ID string) (Entity, error)
 }

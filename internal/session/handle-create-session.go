@@ -56,7 +56,7 @@ func (h Handler) createSaveInput(u user.Entity) (SaveInput, error) {
 		return SaveInput{}, err
 	}
 
-	token, err := h.securityHandler.GenerateToken(ID)
+	token, err := h.jwtHandler.GenerateToken(ID)
 	if err != nil {
 		return SaveInput{}, err
 	}

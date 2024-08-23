@@ -86,6 +86,99 @@ func TestSave(t *testing.T) {
 	}
 }
 
+func TestDelete(t *testing.T) {
+	pool := internaltest.GetPgPool(t)
+	sessionRepo := NewPGRepository(pool)
+	userRepo := user.NewPGRepository(pool)
+
+	type args struct {
+		ctx context.Context
+		ID  string
+	}
+
+	tests := []struct {
+		name string
+		args args
+		err  error
+	}{
+		{
+			name: "deleting session",
+			args: args{
+				ctx: context.TODO(),
+				ID:  createRandomSession(t, sessionRepo, userRepo).ID,
+			},
+			err: nil,
+		},
+		{
+			name: "deleting session with a non existing ID returns error",
+			args: args{
+				ctx: context.TODO(),
+				ID:  internaltest.GenerateUUID(t),
+			},
+			err: shared.ErrNotFound,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := sessionRepo.Delete(tt.args.ctx, tt.args.ID)
+
+			if !errors.Is(err, tt.err) {
+				t.Errorf("Test failed: wanted:%v received:%v ", tt.err, err)
+			}
+		})
+	}
+}
+
+func GetByID(t *testing.T) {
+	pool := internaltest.GetPgPool(t)
+	sessionRepo := NewPGRepository(pool)
+	userRepo := user.NewPGRepository(pool)
+
+	type args struct {
+		ctx context.Context
+		ID  string
+	}
+
+	tests := []struct {
+		name string
+		args args
+		err  error
+	}{
+		{
+			name: "getting session by ID",
+			args: args{
+				ctx: context.TODO(),
+				ID:  createRandomSession(t, sessionRepo, userRepo).ID,
+			},
+			err: nil,
+		},
+		{
+			name: "getting session by non existing ID returns error",
+			args: args{
+				ctx: context.TODO(),
+				ID:  internaltest.GenerateUUID(t),
+			},
+			err: shared.ErrNotFound,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s, err := sessionRepo.GetByID(tt.args.ctx, tt.args.ID)
+
+			if !errors.Is(err, tt.err) {
+				t.Errorf("Test failed: wanted:%v received:%v ", tt.err, err)
+			}
+
+			if s.ID != tt.args.ID {
+				t.Errorf("Test failed: wanted:%v received:%v ", tt.err, err)
+				t.Errorf("found ID is not equal to expected ID. expected: %v received: %v", tt.args.ID, s.ID)
+			}
+		})
+	}
+}
+
 func createRandomUser(t *testing.T, r user.PGRepository) user.Entity {
 	t.Helper()
 
@@ -101,4 +194,21 @@ func createRandomUser(t *testing.T, r user.PGRepository) user.Entity {
 	}
 
 	return u
+}
+
+func createRandomSession(t *testing.T, sessionRepo PGRepository, userRepo user.PGRepository) Entity {
+	t.Helper()
+	u := createRandomUser(t, userRepo)
+
+	s, err := sessionRepo.Save(context.TODO(), SaveInput{
+		ID:     internaltest.GenerateUUID(t),
+		Token:  "123",
+		UserID: u.ID,
+	})
+
+	if err != nil {
+		t.Fatalf("Test failed: error occured while creating test session. received: %v", err)
+	}
+
+	return s
 }

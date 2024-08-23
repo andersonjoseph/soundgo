@@ -5,37 +5,37 @@ import (
 	"log/slog"
 
 	"github.com/andersonjoseph/soundgo/internal/api"
-	"github.com/andersonjoseph/soundgo/internal/security"
 	"github.com/andersonjoseph/soundgo/internal/shared"
 	"github.com/andersonjoseph/soundgo/internal/user"
 )
 
 type Entity struct {
-	ID    string
-	Token string
+	ID     string
+	Token  string
+	UserID string
 }
 
 type Handler struct {
-	repository      Repository
-	userRepository  user.Repository
-	logger          *slog.Logger
-	hasher          shared.PasswordHasher
-	securityHandler security.Handler
+	repository     Repository
+	userRepository user.Repository
+	logger         *slog.Logger
+	hasher         shared.PasswordHasher
+	jwtHandler     shared.JWTHandler
 }
 
 func NewHandler(
 	repository Repository,
 	userRepository user.Repository,
 	hasher shared.PasswordHasher,
-	securityHandler security.Handler,
+	jwtHandler shared.JWTHandler,
 	logger *slog.Logger,
 ) Handler {
 	return Handler{
-		repository:      repository,
-		userRepository:  userRepository,
-		logger:          logger,
-		hasher:          hasher,
-		securityHandler: securityHandler,
+		repository:     repository,
+		userRepository: userRepository,
+		logger:         logger,
+		hasher:         hasher,
+		jwtHandler:     jwtHandler,
 	}
 }
 
