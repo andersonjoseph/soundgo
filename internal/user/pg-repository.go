@@ -63,21 +63,11 @@ func (r PGRepository) Update(ctx context.Context, ID string, i UpdateInput) (e E
 }
 
 func (r PGRepository) GetByUsername(ctx context.Context, username string) (e Entity, err error) {
-	query, args, err := psql.
-		Select("id", "username", "email", "password", "created_at").
-		From("users").
-		Where("username = ?", username).
-		ToSql()
+	return r.getBy(ctx, "username", username)
+}
 
-	if err != nil {
-		return e, err
-	}
-
-	if err = r.db.QueryRow(ctx, query, args...).Scan(&e.ID, &e.Username, &e.Email, &e.Password, &e.CreatedAt); err != nil {
-		return e, handlePgError(err)
-	}
-
-	return e, err
+func (r PGRepository) GetByEmail(ctx context.Context, email string) (e Entity, err error) {
+	return r.getBy(ctx, "email", email)
 }
 
 func (r PGRepository) ExistsByEmail(ctx context.Context, email string) (b bool, err error) {
@@ -96,6 +86,24 @@ func (r PGRepository) ExistsByEmail(ctx context.Context, email string) (b bool, 
 	}
 
 	return b, err
+}
+
+func (r PGRepository) getBy(ctx context.Context, column, value string) (e Entity, err error) {
+	query, args, err := psql.
+		Select("id", "username", "email", "password", "created_at").
+		From("users").
+		Where(fmt.Sprintf("%s = ?", column), value).
+		ToSql()
+
+	if err != nil {
+		return e, err
+	}
+
+	if err = r.db.QueryRow(ctx, query, args...).Scan(&e.ID, &e.Username, &e.Email, &e.Password, &e.CreatedAt); err != nil {
+		return e, handlePgError(err)
+	}
+
+	return e, err
 }
 
 func handlePgError(err error) error {

@@ -104,6 +104,13 @@ func main() {
 			JWTHandler,
 			logger,
 		),
+		PasswordHandler: password.NewHandler(
+			password.NewPGRepository(pool),
+			userRepo,
+			hasher,
+			shared.NewFakeEmailSender(logger),
+			logger,
+		),
 	}
 
 	srv, err := api.NewServer(h, securityHandler)

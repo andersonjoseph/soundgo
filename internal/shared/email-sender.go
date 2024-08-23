@@ -1,5 +1,5 @@
 package shared
 
 type EmailSender interface {
-	SendPasswordCode(email string) error
+	SendPasswordCode(email string, code string) error
 }
