@@ -1,0 +1,46 @@
+tags:
+  - Audio
+
+summary: Delete audio
+
+description: |
+  This operation deletes an audio with the given ID.
+
+operationId: deleteAudio
+
+security: 
+  - bearerAuth: []
+
+parameters:
+  - in: path
+    name: id
+    required: true
+    description: ID of the audio to delete
+    schema:
+      type: string
+      pattern: '^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$'
+      example: 'c6fbe7ed-6423-9818-c871-6b9072a56a13'
+
+responses:
+  '204':
+    description: Audio successfully deleted
+  '403':
+    description: Forbidden access
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "You don't have permission to delete this audio"
+  '404':
+    description: Audio not found
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "Audio not found"

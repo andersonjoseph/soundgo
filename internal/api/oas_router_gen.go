@@ -99,12 +99,16 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 					if len(elem) == 0 {
 						switch r.Method {
+						case "DELETE":
+							s.handleDeleteAudioRequest([1]string{
+								args[0],
+							}, elemIsEscaped, w, r)
 						case "GET":
 							s.handleGetAudioRequest([1]string{
 								args[0],
 							}, elemIsEscaped, w, r)
 						default:
-							s.notAllowed(w, r, "GET")
+							s.notAllowed(w, r, "DELETE,GET")
 						}
 
 						return
@@ -393,6 +397,14 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 
 					if len(elem) == 0 {
 						switch method {
+						case "DELETE":
+							r.name = "DeleteAudio"
+							r.summary = "Delete audio"
+							r.operationID = "deleteAudio"
+							r.pathPattern = "/audios/{id}"
+							r.args = args
+							r.count = 1
+							return r, true
 						case "GET":
 							r.name = "GetAudio"
 							r.summary = "Get audio"

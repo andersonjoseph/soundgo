@@ -71,6 +71,28 @@ func (r PGRepository) Get(ctx context.Context, id string) (e Entity, err error) 
 	return e, nil
 }
 
+func (r PGRepository) Delete(ctx context.Context, ID string) (err error) {
+	query, args, err := psql.
+		Delete("audios").
+		Where("id = ?", ID).
+		ToSql()
+
+	if err != nil {
+		return err
+	}
+
+	res, err := r.db.Exec(ctx, query, args...)
+	if err != nil {
+		return err
+	}
+
+	if res.RowsAffected() == 0 {
+		return shared.ErrNotFound
+	}
+
+	return nil
+}
+
 func handlePgError(err error) error {
 	var pgErr *pgconn.PgError
 

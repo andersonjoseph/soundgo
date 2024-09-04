@@ -21,6 +21,10 @@ type CreateUserRes interface {
 	createUserRes()
 }
 
+type DeleteAudioRes interface {
+	deleteAudioRes()
+}
+
 type DeleteSessionRes interface {
 	deleteSessionRes()
 }

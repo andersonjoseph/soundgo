@@ -67,6 +67,15 @@ func (UnimplementedHandler) CreateUser(ctx context.Context, req *UserInput) (r C
 	return r, ht.ErrNotImplemented
 }
 
+// DeleteAudio implements deleteAudio operation.
+//
+// This operation deletes an audio with the given ID.
+//
+// DELETE /audios/{id}
+func (UnimplementedHandler) DeleteAudio(ctx context.Context, params DeleteAudioParams) (r DeleteAudioRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // DeleteSession implements deleteSession operation.
 //
 // This operation logs the user out by deleting the current session.

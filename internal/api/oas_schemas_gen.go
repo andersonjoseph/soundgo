@@ -468,6 +468,43 @@ func (s *CreateUserConflict) SetError(val string) {
 
 func (*CreateUserConflict) createUserRes() {}
 
+type DeleteAudioForbidden struct {
+	Error OptString `json:"error"`
+}
+
+// GetError returns the value of Error.
+func (s *DeleteAudioForbidden) GetError() OptString {
+	return s.Error
+}
+
+// SetError sets the value of Error.
+func (s *DeleteAudioForbidden) SetError(val OptString) {
+	s.Error = val
+}
+
+func (*DeleteAudioForbidden) deleteAudioRes() {}
+
+// DeleteAudioNoContent is response for DeleteAudio operation.
+type DeleteAudioNoContent struct{}
+
+func (*DeleteAudioNoContent) deleteAudioRes() {}
+
+type DeleteAudioNotFound struct {
+	Error OptString `json:"error"`
+}
+
+// GetError returns the value of Error.
+func (s *DeleteAudioNotFound) GetError() OptString {
+	return s.Error
+}
+
+// SetError sets the value of Error.
+func (s *DeleteAudioNotFound) SetError(val OptString) {
+	s.Error = val
+}
+
+func (*DeleteAudioNotFound) deleteAudioRes() {}
+
 // DeleteSessionNoContent is response for DeleteSession operation.
 type DeleteSessionNoContent struct{}
 

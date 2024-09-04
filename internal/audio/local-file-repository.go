@@ -62,7 +62,11 @@ func (r LocalFileRepository) Get(ctx context.Context, ID string) (File, error) {
 func (r LocalFileRepository) Remove(ctx context.Context, ID string) error {
 	path := filepath.Join(r.basePath, ID)
 
-	if err := os.Remove(path); err != nil {
+	err := os.Remove(path)
+	if errors.Is(err, os.ErrNotExist) {
+		return shared.ErrNotFound
+	}
+	if err != nil {
 		return fmt.Errorf("error while deleting audio file: %w", err)
 	}
 

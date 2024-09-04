@@ -185,6 +185,55 @@ func TestGet(t *testing.T) {
 	}
 }
 
+func TestDelete(t *testing.T) {
+	pool := internaltest.GetPgPool(t)
+	userRepo := user.NewPGRepository(pool)
+	repo := NewPGRepository(pool)
+
+	audio := createRandomAudio(t, repo, userRepo)
+
+	type args struct {
+		ctx context.Context
+		id  string
+	}
+
+	tests := []struct {
+		name string
+		args args
+		err  error
+	}{
+		{
+			name: "deleting audio",
+			args: args{
+				ctx: context.TODO(),
+				id:  audio.ID,
+			},
+		},
+		{
+			name: "deleting non existing audio",
+			args: args{
+				ctx: context.TODO(),
+				id:  internaltest.GenerateUUID(t),
+			},
+			err: shared.ErrNotFound,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := repo.Delete(tt.args.ctx, tt.args.id)
+			if !errors.Is(err, tt.err) {
+				t.Errorf("Test failed: err expected: %v. received: %v", tt.err, err)
+			}
+
+			if tt.err != nil {
+				return
+			}
+		})
+	}
+
+}
+
 func createRandomUser(t *testing.T, r user.PGRepository) user.Entity {
 	t.Helper()
 

@@ -47,6 +47,12 @@ type Handler interface {
 	//
 	// POST /users
 	CreateUser(ctx context.Context, req *UserInput) (CreateUserRes, error)
+	// DeleteAudio implements deleteAudio operation.
+	//
+	// This operation deletes an audio with the given ID.
+	//
+	// DELETE /audios/{id}
+	DeleteAudio(ctx context.Context, params DeleteAudioParams) (DeleteAudioRes, error)
 	// DeleteSession implements deleteSession operation.
 	//
 	// This operation logs the user out by deleting the current session.
