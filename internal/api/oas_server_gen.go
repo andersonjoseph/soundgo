@@ -53,6 +53,12 @@ type Handler interface {
 	//
 	// DELETE /sessions
 	DeleteSession(ctx context.Context) (DeleteSessionRes, error)
+	// GetAudio implements getAudio operation.
+	//
+	// This operation gets an audio with the given ID.
+	//
+	// GET /audios/{id}
+	GetAudio(ctx context.Context, params GetAudioParams) (GetAudioRes, error)
 	// GetAudioFile implements getAudioFile operation.
 	//
 	// This operation streams an audio file with the given ID. The client can request the entire file or

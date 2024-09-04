@@ -99,6 +99,83 @@ func TestSave(t *testing.T) {
 	}
 }
 
+func TestGet(t *testing.T) {
+	pool := internaltest.GetPgPool(t)
+	userRepo := user.NewPGRepository(pool)
+	repo := NewPGRepository(pool)
+
+	audio := createRandomAudio(t, repo, userRepo)
+
+	type args struct {
+		ctx context.Context
+		id  string
+	}
+
+	tests := []struct {
+		name string
+		args args
+		err  error
+	}{
+		{
+			name: "getting audio",
+			args: args{
+				ctx: context.TODO(),
+				id:  audio.ID,
+			},
+		},
+		{
+			name: "getting non existing audio",
+			args: args{
+				ctx: context.TODO(),
+				id:  internaltest.GenerateUUID(t),
+			},
+			err: shared.ErrNotFound,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			e, err := repo.Get(tt.args.ctx, tt.args.id)
+
+			if !errors.Is(err, tt.err) {
+				t.Errorf("Test failed: err expected: %v. received: %v", tt.err, err)
+			}
+
+			if tt.err != nil {
+				return
+			}
+
+			if e.ID != audio.ID {
+				t.Errorf("Test failed: ID expected: %v. received: %v", audio.ID, e.ID)
+			}
+
+			if e.Title != audio.Title {
+				t.Errorf("Test failed: title expected: %v. received: %v", audio.Title, e.Title)
+			}
+
+			if e.Description != audio.Description {
+				t.Errorf("Test failed: Description expected: %v. received: %v", audio.Description, e.Description)
+			}
+
+			if e.UserID != audio.UserID {
+				t.Errorf("Test failed: UserID expected: %v. received: %v", audio.UserID, e.UserID)
+			}
+
+			if e.Status != audio.Status {
+				t.Errorf("Test failed: Status expected: %v. received: %v", audio.Status, e.Status)
+			}
+
+			if e.CreatedAt.IsZero() {
+				t.Errorf("Test failed: CreatedAt is Zero")
+			}
+
+			if e.Playcount != 0 {
+				t.Errorf("Test failed: initial playcount is not Zero")
+			}
+		})
+	}
+}
+
 func createRandomUser(t *testing.T, r user.PGRepository) user.Entity {
 	t.Helper()
 
@@ -114,4 +191,22 @@ func createRandomUser(t *testing.T, r user.PGRepository) user.Entity {
 	}
 
 	return u
+}
+
+func createRandomAudio(t *testing.T, repo PGRepository, userRepo user.PGRepository) Entity {
+	t.Helper()
+
+	a, err := repo.Save(context.TODO(), SaveInput{
+		ID:          internaltest.GenerateUUID(t),
+		Title:       gofakeit.BookTitle(),
+		Description: gofakeit.Name(),
+		UserID:      createRandomUser(t, userRepo).ID,
+		Status:      api.AudioStatusPublished,
+	})
+
+	if err != nil {
+		t.Fatalf("Test failed: error occured while creating test user. received: %v", err)
+	}
+
+	return a
 }

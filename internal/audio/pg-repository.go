@@ -43,6 +43,34 @@ func (r PGRepository) Save(ctx context.Context, i SaveInput) (e Entity, err erro
 	return e, err
 }
 
+func (r PGRepository) Get(ctx context.Context, id string) (e Entity, err error) {
+	query, args, err := psql.
+		Select("id", "title", "description", "play_count", "status", "created_at", "user_id").
+		From("audios").
+		Where("id = ?", id).
+		ToSql()
+
+	if err != nil {
+		return e, err
+	}
+
+	err = r.db.QueryRow(ctx, query, args...).Scan(
+		&e.ID,
+		&e.Title,
+		&e.Description,
+		&e.Playcount,
+		&e.Status,
+		&e.CreatedAt,
+		&e.UserID,
+	)
+
+	if err != nil {
+		return e, handlePgError(err)
+	}
+
+	return e, nil
+}
+
 func handlePgError(err error) error {
 	var pgErr *pgconn.PgError
 

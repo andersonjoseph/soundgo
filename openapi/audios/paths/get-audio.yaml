@@ -1,0 +1,40 @@
+tags:
+  - Audio
+
+summary: Get audio
+
+description: |
+  This operation gets an audio with the given ID.
+
+operationId: getAudio
+
+security: []
+
+parameters:
+  - in: path
+    name: id
+    required: true
+    description: ID of the audio
+    schema:
+      type: string
+      pattern: '^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$'
+      example: 'c6fbe7ed-6423-9818-c871-6b9072a56a13'
+
+responses:
+  '200':
+      description: Audio requested
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/audio.yaml'
+            
+  '404':
+    description: Audio not found
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "Audio not found"

@@ -16,4 +16,5 @@ type SaveInput struct {
 
 type Repository interface {
 	Save(ctx context.Context, i SaveInput) (Entity, error)
+	Get(context.Context, string) (Entity, error)
 }

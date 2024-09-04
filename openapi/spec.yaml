@@ -45,6 +45,10 @@ paths:
     patch:
       $ref: './users/paths/update-user.yaml'
 
+  '/audios/{id}':
+    get:
+      $ref: './audios/paths/get-audio.yaml'
+
   '/audios/{id}/file':
     get:
       $ref: './audios/paths/get-audio-file.yaml'

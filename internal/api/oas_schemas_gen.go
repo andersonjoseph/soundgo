@@ -93,6 +93,7 @@ func (s *Audio) SetPlayCount(val int) {
 }
 
 func (*Audio) createAudioRes() {}
+func (*Audio) getAudioRes()    {}
 
 // Ref: #/components/schemas/audio-input
 type AudioInputMultipart struct {
@@ -562,6 +563,22 @@ func (s *GetAudioFileRequestedRangeNotSatisfiable) SetError(val OptString) {
 }
 
 func (*GetAudioFileRequestedRangeNotSatisfiable) getAudioFileRes() {}
+
+type GetAudioNotFound struct {
+	Error OptString `json:"error"`
+}
+
+// GetError returns the value of Error.
+func (s *GetAudioNotFound) GetError() OptString {
+	return s.Error
+}
+
+// SetError sets the value of Error.
+func (s *GetAudioNotFound) SetError(val OptString) {
+	s.Error = val
+}
+
+func (*GetAudioNotFound) getAudioRes() {}
 
 type NotFound struct {
 	Error string `json:"error"`

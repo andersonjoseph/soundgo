@@ -76,6 +76,15 @@ func (UnimplementedHandler) DeleteSession(ctx context.Context) (r DeleteSessionR
 	return r, ht.ErrNotImplemented
 }
 
+// GetAudio implements getAudio operation.
+//
+// This operation gets an audio with the given ID.
+//
+// GET /audios/{id}
+func (UnimplementedHandler) GetAudio(ctx context.Context, params GetAudioParams) (r GetAudioRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // GetAudioFile implements getAudioFile operation.
 //
 // This operation streams an audio file with the given ID. The client can request the entire file or
