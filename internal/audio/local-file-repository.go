@@ -2,10 +2,13 @@ package audio
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"os"
 	"path/filepath"
+
+	"github.com/andersonjoseph/soundgo/internal/shared"
 )
 
 type LocalFileRepository struct {
@@ -38,6 +41,9 @@ func (r LocalFileRepository) Get(ctx context.Context, ID string) (File, error) {
 	path := filepath.Join(r.basePath, ID)
 
 	file, err := os.Open(path)
+	if errors.Is(err, os.ErrNotExist) {
+		return File{}, shared.ErrNotFound
+	}
 	if err != nil {
 		return File{}, fmt.Errorf("error while opening file: %w", err)
 	}

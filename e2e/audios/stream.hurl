@@ -25,30 +25,20 @@ Authorization: Bearer {{token}}
 [MultipartFormData]
 title: my first audio
 description: just a test
-file: file,test.m4a;
+file: file,test.m4a; audio/mp4
 HTTP 201
-[Asserts]
-jsonpath "$.id" exists
-jsonpath "$.createdAt" exists
+[Captures]
+id: jsonpath "$.id"
 
-jsonpath "$.title" == "my first audio"
-jsonpath "$.description" == "just a test"
-jsonpath "$.playCount" == 0
-jsonpath "$.status" == "published"
-
-# upload invalid file
-POST http://{{HOST}}:{{PORT}}/audios
+# stream file
+GET http://{{HOST}}:{{PORT}}/audios/{{id}}/file
 Authorization: Bearer {{token}}
-[MultipartFormData]
-title: my invalid audio
-description: just a test
-file: file,test.jpg;
-HTTP 415
+HTTP 200
 
-# upload a file without auth
-POST http://{{HOST}}:{{PORT}}/audios
-[MultipartFormData]
-title: my audio
-description: just a test
-file: file,test.m4a;
-HTTP 401
+# stream file without auth
+GET http://{{HOST}}:{{PORT}}/audios/{{id}}/file
+HTTP 200
+
+# stream non existing file
+GET http://{{HOST}}:{{PORT}}/audios/0191be94-e59d-7218-9478-52d948db3f30/file
+HTTP 404
