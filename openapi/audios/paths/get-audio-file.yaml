@@ -6,7 +6,7 @@ summary: Stream audio
 description: |
   This operation streams an audio file with the given ID. The client can request the entire file or a specific byte range to enable partial downloads and streaming.
 
-operationId: getAudio
+operationId: getAudioFile
 
 security: []
 

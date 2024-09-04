@@ -515,7 +515,7 @@ func decodeDeleteSessionResponse(resp *http.Response) (res DeleteSessionRes, _ e
 	return res, validate.UnexpectedStatusCode(resp.StatusCode)
 }
 
-func decodeGetAudioResponse(resp *http.Response) (res GetAudioRes, _ error) {
+func decodeGetAudioFileResponse(resp *http.Response) (res GetAudioFileRes, _ error) {
 	switch resp.StatusCode {
 	case 200:
 		// Code 200.
@@ -531,8 +531,8 @@ func decodeGetAudioResponse(resp *http.Response) (res GetAudioRes, _ error) {
 				return res, err
 			}
 
-			response := GetAudioOK{Data: bytes.NewReader(b)}
-			var wrapper GetAudioOKHeaders
+			response := GetAudioFileOK{Data: bytes.NewReader(b)}
+			var wrapper GetAudioFileOKHeaders
 			wrapper.Response = response
 			h := uri.NewHeaderDecoder(resp.Header)
 			// Parse "Accept-Ranges" header.
@@ -590,8 +590,8 @@ func decodeGetAudioResponse(resp *http.Response) (res GetAudioRes, _ error) {
 				return res, err
 			}
 
-			response := GetAudioPartialContent{Data: bytes.NewReader(b)}
-			var wrapper GetAudioPartialContentHeaders
+			response := GetAudioFilePartialContent{Data: bytes.NewReader(b)}
+			var wrapper GetAudioFilePartialContentHeaders
 			wrapper.Response = response
 			h := uri.NewHeaderDecoder(resp.Header)
 			// Parse "Accept-Ranges" header.
@@ -686,7 +686,7 @@ func decodeGetAudioResponse(resp *http.Response) (res GetAudioRes, _ error) {
 			}
 			d := jx.DecodeBytes(buf)
 
-			var response GetAudioNotFound
+			var response GetAudioFileNotFound
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err
@@ -721,7 +721,7 @@ func decodeGetAudioResponse(resp *http.Response) (res GetAudioRes, _ error) {
 			}
 			d := jx.DecodeBytes(buf)
 
-			var response GetAudioRequestedRangeNotSatisfiable
+			var response GetAudioFileRequestedRangeNotSatisfiable
 			if err := func() error {
 				if err := response.Decode(d); err != nil {
 					return err

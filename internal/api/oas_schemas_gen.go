@@ -436,132 +436,132 @@ func (s *Forbidden) SetError(val string) {
 
 func (*Forbidden) updateUserRes() {}
 
-type GetAudioNotFound struct {
+type GetAudioFileNotFound struct {
 	Error OptString `json:"error"`
 }
 
 // GetError returns the value of Error.
-func (s *GetAudioNotFound) GetError() OptString {
+func (s *GetAudioFileNotFound) GetError() OptString {
 	return s.Error
 }
 
 // SetError sets the value of Error.
-func (s *GetAudioNotFound) SetError(val OptString) {
+func (s *GetAudioFileNotFound) SetError(val OptString) {
 	s.Error = val
 }
 
-func (*GetAudioNotFound) getAudioRes() {}
+func (*GetAudioFileNotFound) getAudioFileRes() {}
 
-type GetAudioOK struct {
+type GetAudioFileOK struct {
 	Data io.Reader
 }
 
 // Read reads data from the Data reader.
 //
 // Kept to satisfy the io.Reader interface.
-func (s GetAudioOK) Read(p []byte) (n int, err error) {
+func (s GetAudioFileOK) Read(p []byte) (n int, err error) {
 	if s.Data == nil {
 		return 0, io.EOF
 	}
 	return s.Data.Read(p)
 }
 
-// GetAudioOKHeaders wraps GetAudioOK with response headers.
-type GetAudioOKHeaders struct {
+// GetAudioFileOKHeaders wraps GetAudioFileOK with response headers.
+type GetAudioFileOKHeaders struct {
 	AcceptRanges OptString
-	Response     GetAudioOK
+	Response     GetAudioFileOK
 }
 
 // GetAcceptRanges returns the value of AcceptRanges.
-func (s *GetAudioOKHeaders) GetAcceptRanges() OptString {
+func (s *GetAudioFileOKHeaders) GetAcceptRanges() OptString {
 	return s.AcceptRanges
 }
 
 // GetResponse returns the value of Response.
-func (s *GetAudioOKHeaders) GetResponse() GetAudioOK {
+func (s *GetAudioFileOKHeaders) GetResponse() GetAudioFileOK {
 	return s.Response
 }
 
 // SetAcceptRanges sets the value of AcceptRanges.
-func (s *GetAudioOKHeaders) SetAcceptRanges(val OptString) {
+func (s *GetAudioFileOKHeaders) SetAcceptRanges(val OptString) {
 	s.AcceptRanges = val
 }
 
 // SetResponse sets the value of Response.
-func (s *GetAudioOKHeaders) SetResponse(val GetAudioOK) {
+func (s *GetAudioFileOKHeaders) SetResponse(val GetAudioFileOK) {
 	s.Response = val
 }
 
-func (*GetAudioOKHeaders) getAudioRes() {}
+func (*GetAudioFileOKHeaders) getAudioFileRes() {}
 
-type GetAudioPartialContent struct {
+type GetAudioFilePartialContent struct {
 	Data io.Reader
 }
 
 // Read reads data from the Data reader.
 //
 // Kept to satisfy the io.Reader interface.
-func (s GetAudioPartialContent) Read(p []byte) (n int, err error) {
+func (s GetAudioFilePartialContent) Read(p []byte) (n int, err error) {
 	if s.Data == nil {
 		return 0, io.EOF
 	}
 	return s.Data.Read(p)
 }
 
-// GetAudioPartialContentHeaders wraps GetAudioPartialContent with response headers.
-type GetAudioPartialContentHeaders struct {
+// GetAudioFilePartialContentHeaders wraps GetAudioFilePartialContent with response headers.
+type GetAudioFilePartialContentHeaders struct {
 	AcceptRanges OptString
 	ContentRange OptString
-	Response     GetAudioPartialContent
+	Response     GetAudioFilePartialContent
 }
 
 // GetAcceptRanges returns the value of AcceptRanges.
-func (s *GetAudioPartialContentHeaders) GetAcceptRanges() OptString {
+func (s *GetAudioFilePartialContentHeaders) GetAcceptRanges() OptString {
 	return s.AcceptRanges
 }
 
 // GetContentRange returns the value of ContentRange.
-func (s *GetAudioPartialContentHeaders) GetContentRange() OptString {
+func (s *GetAudioFilePartialContentHeaders) GetContentRange() OptString {
 	return s.ContentRange
 }
 
 // GetResponse returns the value of Response.
-func (s *GetAudioPartialContentHeaders) GetResponse() GetAudioPartialContent {
+func (s *GetAudioFilePartialContentHeaders) GetResponse() GetAudioFilePartialContent {
 	return s.Response
 }
 
 // SetAcceptRanges sets the value of AcceptRanges.
-func (s *GetAudioPartialContentHeaders) SetAcceptRanges(val OptString) {
+func (s *GetAudioFilePartialContentHeaders) SetAcceptRanges(val OptString) {
 	s.AcceptRanges = val
 }
 
 // SetContentRange sets the value of ContentRange.
-func (s *GetAudioPartialContentHeaders) SetContentRange(val OptString) {
+func (s *GetAudioFilePartialContentHeaders) SetContentRange(val OptString) {
 	s.ContentRange = val
 }
 
 // SetResponse sets the value of Response.
-func (s *GetAudioPartialContentHeaders) SetResponse(val GetAudioPartialContent) {
+func (s *GetAudioFilePartialContentHeaders) SetResponse(val GetAudioFilePartialContent) {
 	s.Response = val
 }
 
-func (*GetAudioPartialContentHeaders) getAudioRes() {}
+func (*GetAudioFilePartialContentHeaders) getAudioFileRes() {}
 
-type GetAudioRequestedRangeNotSatisfiable struct {
+type GetAudioFileRequestedRangeNotSatisfiable struct {
 	Error OptString `json:"error"`
 }
 
 // GetError returns the value of Error.
-func (s *GetAudioRequestedRangeNotSatisfiable) GetError() OptString {
+func (s *GetAudioFileRequestedRangeNotSatisfiable) GetError() OptString {
 	return s.Error
 }
 
 // SetError sets the value of Error.
-func (s *GetAudioRequestedRangeNotSatisfiable) SetError(val OptString) {
+func (s *GetAudioFileRequestedRangeNotSatisfiable) SetError(val OptString) {
 	s.Error = val
 }
 
-func (*GetAudioRequestedRangeNotSatisfiable) getAudioRes() {}
+func (*GetAudioFileRequestedRangeNotSatisfiable) getAudioFileRes() {}
 
 type NotFound struct {
 	Error string `json:"error"`

@@ -225,9 +225,9 @@ func encodeDeleteSessionResponse(response DeleteSessionRes, w http.ResponseWrite
 	}
 }
 
-func encodeGetAudioResponse(response GetAudioRes, w http.ResponseWriter, span trace.Span) error {
+func encodeGetAudioFileResponse(response GetAudioFileRes, w http.ResponseWriter, span trace.Span) error {
 	switch response := response.(type) {
-	case *GetAudioOKHeaders:
+	case *GetAudioFileOKHeaders:
 		w.Header().Set("Content-Type", "audio/mp4")
 		// Encoding response headers.
 		{
@@ -258,7 +258,7 @@ func encodeGetAudioResponse(response GetAudioRes, w http.ResponseWriter, span tr
 
 		return nil
 
-	case *GetAudioPartialContentHeaders:
+	case *GetAudioFilePartialContentHeaders:
 		w.Header().Set("Content-Type", "audio/mp4")
 		// Encoding response headers.
 		{
@@ -304,7 +304,7 @@ func encodeGetAudioResponse(response GetAudioRes, w http.ResponseWriter, span tr
 
 		return nil
 
-	case *GetAudioNotFound:
+	case *GetAudioFileNotFound:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(404)
 		span.SetStatus(codes.Error, http.StatusText(404))
@@ -317,7 +317,7 @@ func encodeGetAudioResponse(response GetAudioRes, w http.ResponseWriter, span tr
 
 		return nil
 
-	case *GetAudioRequestedRangeNotSatisfiable:
+	case *GetAudioFileRequestedRangeNotSatisfiable:
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(416)
 		span.SetStatus(codes.Error, http.StatusText(416))

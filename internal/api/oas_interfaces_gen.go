@@ -25,8 +25,8 @@ type DeleteSessionRes interface {
 	deleteSessionRes()
 }
 
-type GetAudioRes interface {
-	getAudioRes()
+type GetAudioFileRes interface {
+	getAudioFileRes()
 }
 
 type ResetPasswordRes interface {

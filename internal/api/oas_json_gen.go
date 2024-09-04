@@ -1126,14 +1126,14 @@ func (s *Forbidden) UnmarshalJSON(data []byte) error {
 }
 
 // Encode implements json.Marshaler.
-func (s *GetAudioNotFound) Encode(e *jx.Encoder) {
+func (s *GetAudioFileNotFound) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
 // encodeFields encodes fields.
-func (s *GetAudioNotFound) encodeFields(e *jx.Encoder) {
+func (s *GetAudioFileNotFound) encodeFields(e *jx.Encoder) {
 	{
 		if s.Error.Set {
 			e.FieldStart("error")
@@ -1142,14 +1142,14 @@ func (s *GetAudioNotFound) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfGetAudioNotFound = [1]string{
+var jsonFieldsNameOfGetAudioFileNotFound = [1]string{
 	0: "error",
 }
 
-// Decode decodes GetAudioNotFound from json.
-func (s *GetAudioNotFound) Decode(d *jx.Decoder) error {
+// Decode decodes GetAudioFileNotFound from json.
+func (s *GetAudioFileNotFound) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode GetAudioNotFound to nil")
+		return errors.New("invalid: unable to decode GetAudioFileNotFound to nil")
 	}
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
@@ -1169,34 +1169,34 @@ func (s *GetAudioNotFound) Decode(d *jx.Decoder) error {
 		}
 		return nil
 	}); err != nil {
-		return errors.Wrap(err, "decode GetAudioNotFound")
+		return errors.Wrap(err, "decode GetAudioFileNotFound")
 	}
 
 	return nil
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *GetAudioNotFound) MarshalJSON() ([]byte, error) {
+func (s *GetAudioFileNotFound) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *GetAudioNotFound) UnmarshalJSON(data []byte) error {
+func (s *GetAudioFileNotFound) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }
 
 // Encode implements json.Marshaler.
-func (s *GetAudioRequestedRangeNotSatisfiable) Encode(e *jx.Encoder) {
+func (s *GetAudioFileRequestedRangeNotSatisfiable) Encode(e *jx.Encoder) {
 	e.ObjStart()
 	s.encodeFields(e)
 	e.ObjEnd()
 }
 
 // encodeFields encodes fields.
-func (s *GetAudioRequestedRangeNotSatisfiable) encodeFields(e *jx.Encoder) {
+func (s *GetAudioFileRequestedRangeNotSatisfiable) encodeFields(e *jx.Encoder) {
 	{
 		if s.Error.Set {
 			e.FieldStart("error")
@@ -1205,14 +1205,14 @@ func (s *GetAudioRequestedRangeNotSatisfiable) encodeFields(e *jx.Encoder) {
 	}
 }
 
-var jsonFieldsNameOfGetAudioRequestedRangeNotSatisfiable = [1]string{
+var jsonFieldsNameOfGetAudioFileRequestedRangeNotSatisfiable = [1]string{
 	0: "error",
 }
 
-// Decode decodes GetAudioRequestedRangeNotSatisfiable from json.
-func (s *GetAudioRequestedRangeNotSatisfiable) Decode(d *jx.Decoder) error {
+// Decode decodes GetAudioFileRequestedRangeNotSatisfiable from json.
+func (s *GetAudioFileRequestedRangeNotSatisfiable) Decode(d *jx.Decoder) error {
 	if s == nil {
-		return errors.New("invalid: unable to decode GetAudioRequestedRangeNotSatisfiable to nil")
+		return errors.New("invalid: unable to decode GetAudioFileRequestedRangeNotSatisfiable to nil")
 	}
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
@@ -1232,21 +1232,21 @@ func (s *GetAudioRequestedRangeNotSatisfiable) Decode(d *jx.Decoder) error {
 		}
 		return nil
 	}); err != nil {
-		return errors.Wrap(err, "decode GetAudioRequestedRangeNotSatisfiable")
+		return errors.Wrap(err, "decode GetAudioFileRequestedRangeNotSatisfiable")
 	}
 
 	return nil
 }
 
 // MarshalJSON implements stdjson.Marshaler.
-func (s *GetAudioRequestedRangeNotSatisfiable) MarshalJSON() ([]byte, error) {
+func (s *GetAudioFileRequestedRangeNotSatisfiable) MarshalJSON() ([]byte, error) {
 	e := jx.Encoder{}
 	s.Encode(&e)
 	return e.Bytes(), nil
 }
 
 // UnmarshalJSON implements stdjson.Unmarshaler.
-func (s *GetAudioRequestedRangeNotSatisfiable) UnmarshalJSON(data []byte) error {
+func (s *GetAudioFileRequestedRangeNotSatisfiable) UnmarshalJSON(data []byte) error {
 	d := jx.DecodeBytes(data)
 	return s.Decode(d)
 }

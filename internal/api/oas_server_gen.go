@@ -53,13 +53,13 @@ type Handler interface {
 	//
 	// DELETE /sessions
 	DeleteSession(ctx context.Context) (DeleteSessionRes, error)
-	// GetAudio implements getAudio operation.
+	// GetAudioFile implements getAudioFile operation.
 	//
 	// This operation streams an audio file with the given ID. The client can request the entire file or
 	// a specific byte range to enable partial downloads and streaming.
 	//
-	// GET /audios/{id}
-	GetAudio(ctx context.Context, params GetAudioParams) (GetAudioRes, error)
+	// GET /audios/{id}/file
+	GetAudioFile(ctx context.Context, params GetAudioFileParams) (GetAudioFileRes, error)
 	// ResetPassword implements resetPassword operation.
 	//
 	// This operation resets a user's password. The request requires a valid password reset code and a

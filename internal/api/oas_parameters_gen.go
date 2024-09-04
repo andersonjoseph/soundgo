@@ -15,8 +15,8 @@ import (
 	"github.com/ogen-go/ogen/validate"
 )
 
-// GetAudioParams is parameters of getAudio operation.
-type GetAudioParams struct {
+// GetAudioFileParams is parameters of getAudioFile operation.
+type GetAudioFileParams struct {
 	// ID of the audio file to stream.
 	ID string
 	// The byte range to request from the audio file. This header allows for partial content retrieval,
@@ -24,7 +24,7 @@ type GetAudioParams struct {
 	Range OptString
 }
 
-func unpackGetAudioParams(packed middleware.Parameters) (params GetAudioParams) {
+func unpackGetAudioFileParams(packed middleware.Parameters) (params GetAudioFileParams) {
 	{
 		key := middleware.ParameterKey{
 			Name: "id",
@@ -44,7 +44,7 @@ func unpackGetAudioParams(packed middleware.Parameters) (params GetAudioParams) 
 	return params
 }
 
-func decodeGetAudioParams(args [1]string, argsEscaped bool, r *http.Request) (params GetAudioParams, _ error) {
+func decodeGetAudioFileParams(args [1]string, argsEscaped bool, r *http.Request) (params GetAudioFileParams, _ error) {
 	h := uri.NewHeaderDecoder(r.Header)
 	// Decode path: id.
 	if err := func() error {

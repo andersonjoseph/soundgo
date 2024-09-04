@@ -755,21 +755,21 @@ func (s *Server) handleDeleteSessionRequest(args [0]string, argsEscaped bool, w 
 	}
 }
 
-// handleGetAudioRequest handles getAudio operation.
+// handleGetAudioFileRequest handles getAudioFile operation.
 //
 // This operation streams an audio file with the given ID. The client can request the entire file or
 // a specific byte range to enable partial downloads and streaming.
 //
-// GET /audios/{id}
-func (s *Server) handleGetAudioRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
+// GET /audios/{id}/file
+func (s *Server) handleGetAudioFileRequest(args [1]string, argsEscaped bool, w http.ResponseWriter, r *http.Request) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("getAudio"),
+		otelogen.OperationID("getAudioFile"),
 		semconv.HTTPMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/audios/{id}"),
+		semconv.HTTPRouteKey.String("/audios/{id}/file"),
 	}
 
 	// Start a span for this request.
-	ctx, span := s.cfg.Tracer.Start(r.Context(), "GetAudio",
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "GetAudioFile",
 		trace.WithAttributes(otelAttrs...),
 		serverSpanKind,
 	)
@@ -800,11 +800,11 @@ func (s *Server) handleGetAudioRequest(args [1]string, argsEscaped bool, w http.
 		}
 		err          error
 		opErrContext = ogenerrors.OperationContext{
-			Name: "GetAudio",
-			ID:   "getAudio",
+			Name: "GetAudioFile",
+			ID:   "getAudioFile",
 		}
 	)
-	params, err := decodeGetAudioParams(args, argsEscaped, r)
+	params, err := decodeGetAudioFileParams(args, argsEscaped, r)
 	if err != nil {
 		err = &ogenerrors.DecodeParamsError{
 			OperationContext: opErrContext,
@@ -815,13 +815,13 @@ func (s *Server) handleGetAudioRequest(args [1]string, argsEscaped bool, w http.
 		return
 	}
 
-	var response GetAudioRes
+	var response GetAudioFileRes
 	if m := s.cfg.Middleware; m != nil {
 		mreq := middleware.Request{
 			Context:          ctx,
-			OperationName:    "GetAudio",
+			OperationName:    "GetAudioFile",
 			OperationSummary: "Stream audio",
-			OperationID:      "getAudio",
+			OperationID:      "getAudioFile",
 			Body:             nil,
 			Params: middleware.Parameters{
 				{
@@ -838,8 +838,8 @@ func (s *Server) handleGetAudioRequest(args [1]string, argsEscaped bool, w http.
 
 		type (
 			Request  = struct{}
-			Params   = GetAudioParams
-			Response = GetAudioRes
+			Params   = GetAudioFileParams
+			Response = GetAudioFileRes
 		)
 		response, err = middleware.HookMiddleware[
 			Request,
@@ -848,14 +848,14 @@ func (s *Server) handleGetAudioRequest(args [1]string, argsEscaped bool, w http.
 		](
 			m,
 			mreq,
-			unpackGetAudioParams,
+			unpackGetAudioFileParams,
 			func(ctx context.Context, request Request, params Params) (response Response, err error) {
-				response, err = s.h.GetAudio(ctx, params)
+				response, err = s.h.GetAudioFile(ctx, params)
 				return response, err
 			},
 		)
 	} else {
-		response, err = s.h.GetAudio(ctx, params)
+		response, err = s.h.GetAudioFile(ctx, params)
 	}
 	if err != nil {
 		defer recordError("Internal", err)
@@ -863,7 +863,7 @@ func (s *Server) handleGetAudioRequest(args [1]string, argsEscaped bool, w http.
 		return
 	}
 
-	if err := encodeGetAudioResponse(response, w, span); err != nil {
+	if err := encodeGetAudioFileResponse(response, w, span); err != nil {
 		defer recordError("EncodeResponse", err)
 		if !errors.Is(err, ht.ErrInternalServerErrorResponse) {
 			s.cfg.ErrorHandler(ctx, w, r, err)

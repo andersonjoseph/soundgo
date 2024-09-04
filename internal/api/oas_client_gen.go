@@ -69,13 +69,13 @@ type Invoker interface {
 	//
 	// DELETE /sessions
 	DeleteSession(ctx context.Context) (DeleteSessionRes, error)
-	// GetAudio invokes getAudio operation.
+	// GetAudioFile invokes getAudioFile operation.
 	//
 	// This operation streams an audio file with the given ID. The client can request the entire file or
 	// a specific byte range to enable partial downloads and streaming.
 	//
-	// GET /audios/{id}
-	GetAudio(ctx context.Context, params GetAudioParams) (GetAudioRes, error)
+	// GET /audios/{id}/file
+	GetAudioFile(ctx context.Context, params GetAudioFileParams) (GetAudioFileRes, error)
 	// ResetPassword invokes resetPassword operation.
 	//
 	// This operation resets a user's password. The request requires a valid password reset code and a
@@ -668,22 +668,22 @@ func (c *Client) sendDeleteSession(ctx context.Context) (res DeleteSessionRes, e
 	return result, nil
 }
 
-// GetAudio invokes getAudio operation.
+// GetAudioFile invokes getAudioFile operation.
 //
 // This operation streams an audio file with the given ID. The client can request the entire file or
 // a specific byte range to enable partial downloads and streaming.
 //
-// GET /audios/{id}
-func (c *Client) GetAudio(ctx context.Context, params GetAudioParams) (GetAudioRes, error) {
-	res, err := c.sendGetAudio(ctx, params)
+// GET /audios/{id}/file
+func (c *Client) GetAudioFile(ctx context.Context, params GetAudioFileParams) (GetAudioFileRes, error) {
+	res, err := c.sendGetAudioFile(ctx, params)
 	return res, err
 }
 
-func (c *Client) sendGetAudio(ctx context.Context, params GetAudioParams) (res GetAudioRes, err error) {
+func (c *Client) sendGetAudioFile(ctx context.Context, params GetAudioFileParams) (res GetAudioFileRes, err error) {
 	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("getAudio"),
+		otelogen.OperationID("getAudioFile"),
 		semconv.HTTPMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/audios/{id}"),
+		semconv.HTTPRouteKey.String("/audios/{id}/file"),
 	}
 
 	// Run stopwatch.
@@ -698,7 +698,7 @@ func (c *Client) sendGetAudio(ctx context.Context, params GetAudioParams) (res G
 	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
 
 	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, "GetAudio",
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetAudioFile",
 		trace.WithAttributes(otelAttrs...),
 		clientSpanKind,
 	)
@@ -715,7 +715,7 @@ func (c *Client) sendGetAudio(ctx context.Context, params GetAudioParams) (res G
 
 	stage = "BuildURL"
 	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [2]string
+	var pathParts [3]string
 	pathParts[0] = "/audios/"
 	{
 		// Encode "id" parameter.
@@ -735,6 +735,7 @@ func (c *Client) sendGetAudio(ctx context.Context, params GetAudioParams) (res G
 		}
 		pathParts[1] = encoded
 	}
+	pathParts[2] = "/file"
 	uri.AddPathParts(u, pathParts[:]...)
 
 	stage = "EncodeRequest"
@@ -768,7 +769,7 @@ func (c *Client) sendGetAudio(ctx context.Context, params GetAudioParams) (res G
 	defer resp.Body.Close()
 
 	stage = "DecodeResponse"
-	result, err := decodeGetAudioResponse(resp)
+	result, err := decodeGetAudioFileResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
