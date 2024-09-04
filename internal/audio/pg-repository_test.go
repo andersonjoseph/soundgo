@@ -35,7 +35,7 @@ func TestSave(t *testing.T) {
 					Title:       gofakeit.BookTitle(),
 					Description: gofakeit.Name(),
 					UserID:      createRandomUser(t, userRepo).ID,
-					Status:      api.AudioStatusPublished,
+					Status:      api.AudioInputMultipartStatusPublished,
 				},
 			},
 		},
@@ -48,7 +48,7 @@ func TestSave(t *testing.T) {
 					Title:       gofakeit.BookTitle(),
 					Description: gofakeit.Name(),
 					UserID:      internaltest.GenerateUUID(t),
-					Status:      api.AudioStatusPublished,
+					Status:      api.AudioInputMultipartStatusPublished,
 				},
 			},
 			err: shared.ErrNotFound,
@@ -84,7 +84,16 @@ func TestSave(t *testing.T) {
 				t.Errorf("Test failed: UserID expected: %v. received: %v", tt.args.i.UserID, e.UserID)
 			}
 
-			if e.Status != tt.args.i.Status {
+			expectedStatus, err := e.Status.MarshalText()
+			if err != nil {
+				t.Fatalf("Test failed: error while marshalling expected status: %v", err)
+			}
+			receviedStatus, err := tt.args.i.Status.MarshalText()
+			if err != nil {
+				t.Fatalf("Test failed: error while marshalling expected status: %v", err)
+			}
+
+			if string(expectedStatus) != string(receviedStatus) {
 				t.Errorf("Test failed: Status expected: %v. received: %v", tt.args.i.Status, e.Status)
 			}
 
@@ -201,7 +210,7 @@ func createRandomAudio(t *testing.T, repo PGRepository, userRepo user.PGReposito
 		Title:       gofakeit.BookTitle(),
 		Description: gofakeit.Name(),
 		UserID:      createRandomUser(t, userRepo).ID,
-		Status:      api.AudioStatusPublished,
+		Status:      api.AudioInputMultipartStatusPublished,
 	})
 
 	if err != nil {

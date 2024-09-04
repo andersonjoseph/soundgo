@@ -161,6 +161,41 @@ func (s *Server) decodeCreateAudioRequest(r *http.Request) (
 			}
 		}
 		{
+			cfg := uri.QueryParameterDecodingConfig{
+				Name:    "status",
+				Style:   uri.QueryStyleForm,
+				Explode: true,
+			}
+			if err := q.HasParam(cfg); err == nil {
+				if err := q.DecodeParam(cfg, func(d uri.Decoder) error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					request.Status = AudioInputMultipartStatus(c)
+					return nil
+				}); err != nil {
+					return req, close, errors.Wrap(err, "decode \"status\"")
+				}
+				if err := func() error {
+					if err := request.Status.Validate(); err != nil {
+						return err
+					}
+					return nil
+				}(); err != nil {
+					return req, close, errors.Wrap(err, "validate")
+				}
+			} else {
+				return req, close, errors.Wrap(err, "query")
+			}
+		}
+		{
 			if err := func() error {
 				files, ok := r.MultipartForm.File["file"]
 				if !ok || len(files) < 1 {

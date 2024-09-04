@@ -45,7 +45,7 @@ func (h Handler) CreateAudio(ctx context.Context, req *api.AudioInputMultipart) 
 		Title:       req.Title,
 		Description: req.Description.Value,
 		UserID:      userID,
-		Status:      api.AudioStatusPublished,
+		Status:      req.Status,
 	})
 
 	if err != nil {

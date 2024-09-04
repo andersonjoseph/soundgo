@@ -8,7 +8,9 @@ description: |
 
 operationId: getAudio
 
-security: []
+security: 
+  - {}
+  - bearerAuth: []
 
 parameters:
   - in: path
@@ -27,7 +29,16 @@ responses:
         application/json:
           schema:
             $ref: '../schemas/audio.yaml'
-            
+  '403':
+    description: Forbidden access
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "Access to this audio is forbidden"
   '404':
     description: Audio not found
     content:
@@ -38,3 +49,4 @@ responses:
             error:
               type: string
               example: "Audio not found"
+

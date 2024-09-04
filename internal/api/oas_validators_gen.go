@@ -140,10 +140,32 @@ func (s *AudioInputMultipart) Validate() error {
 			Error: err,
 		})
 	}
+	if err := func() error {
+		if err := s.Status.Validate(); err != nil {
+			return err
+		}
+		return nil
+	}(); err != nil {
+		failures = append(failures, validate.FieldError{
+			Name:  "status",
+			Error: err,
+		})
+	}
 	if len(failures) > 0 {
 		return &validate.Error{Fields: failures}
 	}
 	return nil
+}
+
+func (s AudioInputMultipartStatus) Validate() error {
+	switch s {
+	case "published":
+		return nil
+	case "hidden":
+		return nil
+	default:
+		return errors.Errorf("invalid value: %v", s)
+	}
 }
 
 func (s AudioStatus) Validate() error {

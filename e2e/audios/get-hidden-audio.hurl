@@ -26,13 +26,13 @@ Authorization: Bearer {{token}}
 title: my first audio
 description: just a test
 file: file,test.m4a; audio/mp4
-status: published
+status: hidden
 HTTP 201
 [Captures]
-id: jsonpath "$.id"
+audioID: jsonpath "$.id"
 
 # get audio
-GET http://{{HOST}}:{{PORT}}/audios/{{id}}
+GET http://{{HOST}}:{{PORT}}/audios/{{audioID}}
 Authorization: Bearer {{token}}
 HTTP 200
 [Asserts]
@@ -42,12 +42,34 @@ jsonpath "$.createdAt" exists
 jsonpath "$.title" == "my first audio"
 jsonpath "$.description" == "just a test"
 jsonpath "$.playCount" == 0
-jsonpath "$.status" == "published"
+jsonpath "$.status" == "hidden"
 
-# get audio without auth
-GET http://{{HOST}}:{{PORT}}/audios/{{id}}
-HTTP 200
+# creating other user
+POST http://{{HOST}}:{{PORT}}/users
+{
+    "username": "jhondoe2",
+    "email": "john2@mail.com",
+    "password": "Str0ngp4s$w0rd"
+}
+HTTP 201
+[Captures]
+userID: jsonpath "$.id"
 
-# get non existing file
-GET http://{{HOST}}:{{PORT}}/audios/0191be94-e59d-7218-9478-52d948db3f30
-HTTP 404
+# creating session
+POST http://{{HOST}}:{{PORT}}/sessions
+{
+    "username": "jhondoe2",
+    "password": "Str0ngp4s$w0rd"
+}
+HTTP 201
+[Captures]
+token: jsonpath "$.token"
+
+# getting hidden audio
+GET http://{{HOST}}:{{PORT}}/audios/{{audioID}}
+Authorization: Bearer {{token}}
+HTTP 403
+
+# getting hidden audio without auth
+GET http://{{HOST}}:{{PORT}}/audios/{{audioID}}
+HTTP 403

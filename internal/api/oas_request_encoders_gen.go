@@ -53,6 +53,19 @@ func encodeCreateAudioRequest(
 			return errors.Wrap(err, "encode query")
 		}
 	}
+	{
+		// Encode "status" form field.
+		cfg := uri.QueryParameterEncodingConfig{
+			Name:    "status",
+			Style:   uri.QueryStyleForm,
+			Explode: true,
+		}
+		if err := q.EncodeParam(cfg, func(e uri.Encoder) error {
+			return e.EncodeValue(conv.StringToString(string(request.Status)))
+		}); err != nil {
+			return errors.Wrap(err, "encode query")
+		}
+	}
 	body, boundary := ht.CreateMultipartBody(func(w *multipart.Writer) error {
 		if err := request.File.WriteMultipart("file", w); err != nil {
 			return errors.Wrap(err, "write \"file\"")

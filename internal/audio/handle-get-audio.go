@@ -10,12 +10,19 @@ import (
 
 func (h Handler) GetAudio(ctx context.Context, params api.GetAudioParams) (api.GetAudioRes, error) {
 	e, err := h.repository.Get(ctx, params.ID)
-
 	if errors.Is(err, shared.ErrNotFound) {
 		return &api.GetAudioNotFound{}, nil
 	}
 	if err != nil {
 		return nil, err
+	}
+
+	if e.Status == api.AudioStatusHidden {
+		currentUserID, err := h.contextRequestHandler.GetUserID(ctx)
+
+		if err != nil || currentUserID != e.UserID {
+			return &api.GetAudioForbidden{}, nil
+		}
 	}
 
 	return &api.Audio{

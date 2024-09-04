@@ -98,9 +98,10 @@ func (*Audio) getAudioRes()    {}
 // Ref: #/components/schemas/audio-input
 type AudioInputMultipart struct {
 	// The audio file to upload.
-	File        ht.MultipartFile `json:"file"`
-	Title       string           `json:"title"`
-	Description OptString        `json:"description"`
+	File        ht.MultipartFile          `json:"file"`
+	Title       string                    `json:"title"`
+	Description OptString                 `json:"description"`
+	Status      AudioInputMultipartStatus `json:"status"`
 }
 
 // GetFile returns the value of File.
@@ -118,6 +119,11 @@ func (s *AudioInputMultipart) GetDescription() OptString {
 	return s.Description
 }
 
+// GetStatus returns the value of Status.
+func (s *AudioInputMultipart) GetStatus() AudioInputMultipartStatus {
+	return s.Status
+}
+
 // SetFile sets the value of File.
 func (s *AudioInputMultipart) SetFile(val ht.MultipartFile) {
 	s.File = val
@@ -131,6 +137,52 @@ func (s *AudioInputMultipart) SetTitle(val string) {
 // SetDescription sets the value of Description.
 func (s *AudioInputMultipart) SetDescription(val OptString) {
 	s.Description = val
+}
+
+// SetStatus sets the value of Status.
+func (s *AudioInputMultipart) SetStatus(val AudioInputMultipartStatus) {
+	s.Status = val
+}
+
+type AudioInputMultipartStatus string
+
+const (
+	AudioInputMultipartStatusPublished AudioInputMultipartStatus = "published"
+	AudioInputMultipartStatusHidden    AudioInputMultipartStatus = "hidden"
+)
+
+// AllValues returns all AudioInputMultipartStatus values.
+func (AudioInputMultipartStatus) AllValues() []AudioInputMultipartStatus {
+	return []AudioInputMultipartStatus{
+		AudioInputMultipartStatusPublished,
+		AudioInputMultipartStatusHidden,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s AudioInputMultipartStatus) MarshalText() ([]byte, error) {
+	switch s {
+	case AudioInputMultipartStatusPublished:
+		return []byte(s), nil
+	case AudioInputMultipartStatusHidden:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *AudioInputMultipartStatus) UnmarshalText(data []byte) error {
+	switch AudioInputMultipartStatus(data) {
+	case AudioInputMultipartStatusPublished:
+		*s = AudioInputMultipartStatusPublished
+		return nil
+	case AudioInputMultipartStatusHidden:
+		*s = AudioInputMultipartStatusHidden
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
 }
 
 type AudioStatus string
@@ -563,6 +615,22 @@ func (s *GetAudioFileRequestedRangeNotSatisfiable) SetError(val OptString) {
 }
 
 func (*GetAudioFileRequestedRangeNotSatisfiable) getAudioFileRes() {}
+
+type GetAudioForbidden struct {
+	Error OptString `json:"error"`
+}
+
+// GetError returns the value of Error.
+func (s *GetAudioForbidden) GetError() OptString {
+	return s.Error
+}
+
+// SetError sets the value of Error.
+func (s *GetAudioForbidden) SetError(val OptString) {
+	s.Error = val
+}
+
+func (*GetAudioForbidden) getAudioRes() {}
 
 type GetAudioNotFound struct {
 	Error OptString `json:"error"`

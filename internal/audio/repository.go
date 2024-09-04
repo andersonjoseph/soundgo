@@ -11,7 +11,7 @@ type SaveInput struct {
 	Title       string
 	Description string
 	UserID      string
-	Status      api.AudioStatus
+	Status      api.AudioInputMultipartStatus
 }
 
 type Repository interface {

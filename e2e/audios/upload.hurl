@@ -25,6 +25,7 @@ Authorization: Bearer {{token}}
 [MultipartFormData]
 title: my first audio
 description: just a test
+status: published
 file: file,test.m4a;
 HTTP 201
 [Asserts]
@@ -42,6 +43,7 @@ Authorization: Bearer {{token}}
 [MultipartFormData]
 title: my invalid audio
 description: just a test
+status: published
 file: file,test.jpg;
 HTTP 415
 

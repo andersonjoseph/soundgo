@@ -26,6 +26,7 @@ Authorization: Bearer {{token}}
 title: my first audio
 description: just a test
 file: file,test.m4a; audio/mp4
+status: published
 HTTP 201
 [Captures]
 id: jsonpath "$.id"
