@@ -16,11 +16,12 @@ type Entity struct {
 }
 
 type Handler struct {
-	repository     Repository
-	userRepository user.Repository
-	logger         *slog.Logger
-	hasher         shared.PasswordHasher
-	jwtHandler     shared.JWTHandler
+	repository            Repository
+	userRepository        user.Repository
+	logger                *slog.Logger
+	hasher                shared.PasswordHasher
+	jwtHandler            shared.JWTHandler
+	contextRequestHandler shared.RequestContextHandler
 }
 
 func NewHandler(
@@ -29,13 +30,15 @@ func NewHandler(
 	hasher shared.PasswordHasher,
 	jwtHandler shared.JWTHandler,
 	logger *slog.Logger,
+	contextRequestHandler shared.RequestContextHandler,
 ) Handler {
 	return Handler{
-		repository:     repository,
-		userRepository: userRepository,
-		logger:         logger,
-		hasher:         hasher,
-		jwtHandler:     jwtHandler,
+		repository:            repository,
+		userRepository:        userRepository,
+		logger:                logger,
+		hasher:                hasher,
+		jwtHandler:            jwtHandler,
+		contextRequestHandler: contextRequestHandler,
 	}
 }
 

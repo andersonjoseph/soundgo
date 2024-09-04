@@ -32,6 +32,13 @@ type Invoker interface {
 	//
 	// GET /health
 	CheckHealth(ctx context.Context) (CheckHealthRes, error)
+	// CreateAudio invokes createAudio operation.
+	//
+	// This operation allows the client to upload an audio file. The server stores the file and returns
+	// the ID of the created resource.
+	//
+	// POST /audios
+	CreateAudio(ctx context.Context, request *AudioInputMultipart) (CreateAudioRes, error)
 	// CreatePasswordResetRequest invokes createPasswordResetRequest operation.
 	//
 	// This operation initiates a password reset process by creating a password reset request.
@@ -62,6 +69,13 @@ type Invoker interface {
 	//
 	// DELETE /sessions
 	DeleteSession(ctx context.Context) (DeleteSessionRes, error)
+	// GetAudio invokes getAudio operation.
+	//
+	// This operation streams an audio file with the given ID. The client can request the entire file or
+	// a specific byte range to enable partial downloads and streaming.
+	//
+	// GET /audios/{id}
+	GetAudio(ctx context.Context, params GetAudioParams) (GetAudioRes, error)
 	// ResetPassword invokes resetPassword operation.
 	//
 	// This operation resets a user's password. The request requires a valid password reset code and a
@@ -202,6 +216,115 @@ func (c *Client) sendCheckHealth(ctx context.Context) (res CheckHealthRes, err e
 
 	stage = "DecodeResponse"
 	result, err := decodeCheckHealthResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// CreateAudio invokes createAudio operation.
+//
+// This operation allows the client to upload an audio file. The server stores the file and returns
+// the ID of the created resource.
+//
+// POST /audios
+func (c *Client) CreateAudio(ctx context.Context, request *AudioInputMultipart) (CreateAudioRes, error) {
+	res, err := c.sendCreateAudio(ctx, request)
+	return res, err
+}
+
+func (c *Client) sendCreateAudio(ctx context.Context, request *AudioInputMultipart) (res CreateAudioRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("createAudio"),
+		semconv.HTTPMethodKey.String("POST"),
+		semconv.HTTPRouteKey.String("/audios"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "CreateAudio",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [1]string
+	pathParts[0] = "/audios"
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "POST", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+	if err := encodeCreateAudioRequest(request, r); err != nil {
+		return res, errors.Wrap(err, "encode request")
+	}
+
+	{
+		type bitset = [1]uint8
+		var satisfied bitset
+		{
+			stage = "Security:BearerAuth"
+			switch err := c.securityBearerAuth(ctx, "CreateAudio", r); {
+			case err == nil: // if NO error
+				satisfied[0] |= 1 << 0
+			case errors.Is(err, ogenerrors.ErrSkipClientSecurity):
+				// Skip this security.
+			default:
+				return res, errors.Wrap(err, "security \"BearerAuth\"")
+			}
+		}
+
+		if ok := func() bool {
+		nextRequirement:
+			for _, requirement := range []bitset{
+				{0b00000001},
+			} {
+				for i, mask := range requirement {
+					if satisfied[i]&mask != mask {
+						continue nextRequirement
+					}
+				}
+				return true
+			}
+			return false
+		}(); !ok {
+			return res, ogenerrors.ErrSecurityRequirementIsNotSatisfied
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeCreateAudioResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -538,6 +661,114 @@ func (c *Client) sendDeleteSession(ctx context.Context) (res DeleteSessionRes, e
 
 	stage = "DecodeResponse"
 	result, err := decodeDeleteSessionResponse(resp)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// GetAudio invokes getAudio operation.
+//
+// This operation streams an audio file with the given ID. The client can request the entire file or
+// a specific byte range to enable partial downloads and streaming.
+//
+// GET /audios/{id}
+func (c *Client) GetAudio(ctx context.Context, params GetAudioParams) (GetAudioRes, error) {
+	res, err := c.sendGetAudio(ctx, params)
+	return res, err
+}
+
+func (c *Client) sendGetAudio(ctx context.Context, params GetAudioParams) (res GetAudioRes, err error) {
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("getAudio"),
+		semconv.HTTPMethodKey.String("GET"),
+		semconv.HTTPRouteKey.String("/audios/{id}"),
+	}
+
+	// Run stopwatch.
+	startTime := time.Now()
+	defer func() {
+		// Use floating point division here for higher precision (instead of Millisecond method).
+		elapsedDuration := time.Since(startTime)
+		c.duration.Record(ctx, float64(float64(elapsedDuration)/float64(time.Millisecond)), metric.WithAttributes(otelAttrs...))
+	}()
+
+	// Increment request counter.
+	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+
+	// Start a span for this request.
+	ctx, span := c.cfg.Tracer.Start(ctx, "GetAudio",
+		trace.WithAttributes(otelAttrs...),
+		clientSpanKind,
+	)
+	// Track stage for error reporting.
+	var stage string
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			span.SetStatus(codes.Error, stage)
+			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
+		}
+		span.End()
+	}()
+
+	stage = "BuildURL"
+	u := uri.Clone(c.requestURL(ctx))
+	var pathParts [2]string
+	pathParts[0] = "/audios/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.StringToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		encoded, err := e.Result()
+		if err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		pathParts[1] = encoded
+	}
+	uri.AddPathParts(u, pathParts[:]...)
+
+	stage = "EncodeRequest"
+	r, err := ht.NewRequest(ctx, "GET", u)
+	if err != nil {
+		return res, errors.Wrap(err, "create request")
+	}
+
+	stage = "EncodeHeaderParams"
+	h := uri.NewHeaderEncoder(r.Header)
+	{
+		cfg := uri.HeaderParameterEncodingConfig{
+			Name:    "Range",
+			Explode: false,
+		}
+		if err := h.EncodeParam(cfg, func(e uri.Encoder) error {
+			if val, ok := params.Range.Get(); ok {
+				return e.EncodeValue(conv.StringToString(val))
+			}
+			return nil
+		}); err != nil {
+			return res, errors.Wrap(err, "encode header")
+		}
+	}
+
+	stage = "SendRequest"
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	stage = "DecodeResponse"
+	result, err := decodeGetAudioResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

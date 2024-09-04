@@ -38,19 +38,21 @@ test:
 	docker compose exec soundgo_test go test ./...
 
 e2e-tests:
-	HOST=${TEST_HOST} PORT=${TEST_PORT} bash ./e2e/run.sh
+	trap 'docker compose --profile test down -v' EXIT; \
+	HOST=${TEST_HOST} PORT=${TEST_PORT} FILES=$(file) bash ./e2e/run.sh
 		
 debug:
 	docker compose --profile test up --wait -d
 	@trap 'docker compose --profile test down -v' EXIT; \
 	docker compose exec soundgo_test goose -dir ./migrations up; \
-	docker compose exec -it soundgo_test bash -c "dlv debug ./cmd/main/main.go"
+	docker compose exec -it soundgo_test bash
 
 request:
 	@if [ -z "$(file)" ]; then \
-			echo "Error: Please provide a migration name. Usage: make request file=<hurl_file>"; \
-			exit 1; \
+		echo "Error: Please provide a migration name. Usage: make request file=<hurl_file>"; \
+		exit 1; \
 	fi; \
 	docker compose exec soundgo_test goose -dir ./migrations up
 	trap 'docker compose down -v test_db && docker compose up --wait -d test_db' EXIT; \
 	docker compose exec soundgo_test hurl --test --variable HOST=${TEST_HOST} --variable PORT=${TEST_PORT} $(file)
+	docker compose exec -it soundgo_test bash

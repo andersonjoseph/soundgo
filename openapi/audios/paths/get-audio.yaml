@@ -1,0 +1,86 @@
+tags:
+  - Audio
+
+summary: Stream audio
+
+description: |
+  This operation streams an audio file with the given ID. The client can request the entire file or a specific byte range to enable partial downloads and streaming.
+
+operationId: getAudio
+
+security: []
+
+parameters:
+  - in: path
+    name: id
+    required: true
+    description: ID of the audio file to stream
+    schema:
+      type: string
+      pattern: '^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$'
+      example: 'c6fbe7ed-6423-9818-c871-6b9072a56a13'
+
+  - in: header
+    name: Range
+    required: false
+    description: |
+      The byte range to request from the audio file. This header allows for partial content retrieval, enabling streaming and seeking within the file.
+    schema:
+      type: string
+      example: bytes=209880-3116612
+
+responses:
+  '206':
+      description: Partial content served
+      headers:
+        Content-Range:
+          description: The range of bytes being sent in this response
+          schema:
+            type: string
+            example: bytes 209880-3116612/1234567
+        Accept-Ranges:
+          description: Indicates that the server supports range requests
+          schema:
+            type: string
+            example: bytes
+      content:
+        audio/mp4:
+          schema:
+            type: string
+            format: binary
+
+  '200':
+    description: Full audio file served
+    headers:
+      Accept-Ranges:
+        description: Indicates that the server supports range requests
+        schema:
+          type: string
+          example: bytes
+    content:
+      audio/mp4:
+        schema:
+          type: string
+          format: binary
+
+  '404':
+    description: Audio file not found
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "Audio file not found"
+
+  '416':
+    description: Requested range not satisfiable
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "Requested Range Not Satisfiable"

@@ -19,7 +19,10 @@ func (h Handler) UpdateUser(ctx context.Context, req *api.UpdateUserInput, param
 		),
 	)
 
-	currentUserID := ctx.Value("userID").(string)
+	currentUserID, err := h.contextRequestHandler.GetUserID(ctx)
+	if err != nil {
+		return nil, err
+	}
 
 	if currentUserID != params.ID {
 		h.logger.Info("user attempted to update other user",

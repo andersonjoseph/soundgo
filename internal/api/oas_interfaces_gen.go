@@ -5,6 +5,10 @@ type CheckHealthRes interface {
 	checkHealthRes()
 }
 
+type CreateAudioRes interface {
+	createAudioRes()
+}
+
 type CreatePasswordResetRequestRes interface {
 	createPasswordResetRequestRes()
 }
@@ -19,6 +23,10 @@ type CreateUserRes interface {
 
 type DeleteSessionRes interface {
 	deleteSessionRes()
+}
+
+type GetAudioRes interface {
+	getAudioRes()
 }
 
 type ResetPasswordRes interface {

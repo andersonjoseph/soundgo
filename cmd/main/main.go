@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/andersonjoseph/soundgo/internal/api"
+	"github.com/andersonjoseph/soundgo/internal/audio"
 	"github.com/andersonjoseph/soundgo/internal/health"
 	"github.com/andersonjoseph/soundgo/internal/password"
 	"github.com/andersonjoseph/soundgo/internal/security"
@@ -15,6 +16,7 @@ import (
 	"github.com/andersonjoseph/soundgo/internal/shared"
 	"github.com/andersonjoseph/soundgo/internal/user"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/rs/cors"
 )
 
 type SecurityHandler = security.Handler
@@ -23,12 +25,27 @@ type UserHandler = user.Handler
 type SessionHandler = session.Handler
 type PasswordHandler = password.Handler
 type HealthHandler = health.Handler
+type AudioHandler = audio.Handler
 
 type serverHandler struct {
 	UserHandler
 	PasswordHandler
 	SessionHandler
 	HealthHandler
+	AudioHandler
+}
+
+func hostInContextMiddleware(h http.Handler) (http.Handler, error) {
+	host, ok := os.LookupEnv("HOST")
+	if !ok {
+		return nil, fmt.Errorf("HOST is missing from environment")
+	}
+
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := context.WithValue(r.Context(), "host", host)
+
+		h.ServeHTTP(w, r.WithContext(ctx))
+	}), nil
 }
 
 func getPGURL() (string, error) {
@@ -88,14 +105,21 @@ func main() {
 	userRepo := user.NewPGRepository(pool)
 	sessionRepo := session.NewPGRepository(pool)
 	JWTHandler := shared.JWTHandler{}
+	requestContextHandler := shared.RequestContextHandler{}
 
 	securityHandler := security.NewHandler(sessionRepo, JWTHandler, logger)
+	audiosPath, ok := os.LookupEnv("AUDIOS_PATH")
+	if !ok {
+		logger.Error("AUDIOS_PATH is not present on environment", "error", err)
+		os.Exit(1)
+	}
 
 	h := serverHandler{
 		UserHandler: user.NewHandler(
 			userRepo,
 			logger,
 			hasher,
+			requestContextHandler,
 		),
 		SessionHandler: session.NewHandler(
 			sessionRepo,
@@ -103,6 +127,7 @@ func main() {
 			hasher,
 			JWTHandler,
 			logger,
+			requestContextHandler,
 		),
 		PasswordHandler: password.NewHandler(
 			password.NewPGRepository(pool),
@@ -111,11 +136,25 @@ func main() {
 			shared.NewFakeEmailSender(logger),
 			logger,
 		),
+		AudioHandler: audio.NewHandler(
+			logger,
+			audio.NewPGRepository(pool),
+			audio.NewLocalFileRepository(audiosPath),
+			requestContextHandler,
+		),
 	}
 
 	srv, err := api.NewServer(h, securityHandler)
 	if err != nil {
 		logger.Error("error creating app server", "error", err)
+		os.Exit(1)
+	}
+
+	handler := cors.AllowAll().Handler(srv)
+
+	handler, err = hostInContextMiddleware(handler)
+	if err != nil {
+		logger.Error(err.Error())
 		os.Exit(1)
 	}
 
@@ -126,7 +165,7 @@ func main() {
 	}
 
 	logger.Info("app started", "port", port)
-	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), srv); err != nil {
+	if err := http.ListenAndServe(fmt.Sprintf(":%s", port), handler); err != nil {
 		logger.Error("error while starting http server", "error", err)
 		os.Exit(1)
 	}

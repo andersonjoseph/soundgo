@@ -24,6 +24,16 @@ func (UnimplementedHandler) CheckHealth(ctx context.Context) (r CheckHealthRes, 
 	return r, ht.ErrNotImplemented
 }
 
+// CreateAudio implements createAudio operation.
+//
+// This operation allows the client to upload an audio file. The server stores the file and returns
+// the ID of the created resource.
+//
+// POST /audios
+func (UnimplementedHandler) CreateAudio(ctx context.Context, req *AudioInputMultipart) (r CreateAudioRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // CreatePasswordResetRequest implements createPasswordResetRequest operation.
 //
 // This operation initiates a password reset process by creating a password reset request.
@@ -63,6 +73,16 @@ func (UnimplementedHandler) CreateUser(ctx context.Context, req *UserInput) (r C
 //
 // DELETE /sessions
 func (UnimplementedHandler) DeleteSession(ctx context.Context) (r DeleteSessionRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// GetAudio implements getAudio operation.
+//
+// This operation streams an audio file with the given ID. The client can request the entire file or
+// a specific byte range to enable partial downloads and streaming.
+//
+// GET /audios/{id}
+func (UnimplementedHandler) GetAudio(ctx context.Context, params GetAudioParams) (r GetAudioRes, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

@@ -23,6 +23,9 @@ tags:
   - name: Session
     description: Operations related to session management, such as creating and deleting sessions (user login and logout).
 
+  - name: Audio
+    description: Operations related to audio management, such as creating, deleting and streaming audios.
+
   - name: Health
     description: |
       The Health tag encompasses endpoints that are used to monitor and check the operational 
@@ -37,9 +40,18 @@ paths:
   '/users':
     post:
       $ref: './users/paths/create-user.yaml'
+
   '/users/{id}':
     patch:
       $ref: './users/paths/update-user.yaml'
+
+  '/audios/{id}':
+    get:
+      $ref: './audios/paths/get-audio.yaml'
+
+  '/audios':
+    post:
+      $ref: './audios/paths/create-audio.yaml'
 
   '/sessions':
     post:

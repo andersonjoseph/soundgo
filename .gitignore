@@ -21,6 +21,7 @@
 go.work
 tmp/
 openapi/spec.bundle.yaml
+uploaded-audios
 
 # env files
 .env

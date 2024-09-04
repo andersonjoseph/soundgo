@@ -12,7 +12,11 @@ func (h Handler) DeleteSession(ctx context.Context) (api.DeleteSessionRes, error
 	h.logger.Info(
 		"deleting session",
 	)
-	session := ctx.Value("sessionID").(string)
+	session, err := h.contextRequestHandler.GetSessionID(ctx)
+
+	if err != nil {
+		return nil, err
+	}
 
 	if err := h.repository.Delete(ctx, session); err != nil {
 		h.logger.Error(

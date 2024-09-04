@@ -1,0 +1,48 @@
+tags:
+  - Audio
+
+summary: Upload audio
+
+description: |
+  This operation allows the client to upload an audio file. The server stores the file and returns the ID of the created resource.
+
+operationId: createAudio
+
+security: 
+  - bearerAuth: []
+
+requestBody:
+  required: true
+  content:
+    multipart/form-data:
+      schema:
+          $ref: '../schemas/audio-input.yaml'
+responses:
+  '201':
+    description: Audio file created successfully
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/audio.yaml'
+
+  '400':
+    description: Invalid input
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "Invalid audio file or metadata"
+  
+  '415':
+    description: Unsupported Media Type
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "Unsupported media type"

@@ -16,6 +16,13 @@ type Handler interface {
 	//
 	// GET /health
 	CheckHealth(ctx context.Context) (CheckHealthRes, error)
+	// CreateAudio implements createAudio operation.
+	//
+	// This operation allows the client to upload an audio file. The server stores the file and returns
+	// the ID of the created resource.
+	//
+	// POST /audios
+	CreateAudio(ctx context.Context, req *AudioInputMultipart) (CreateAudioRes, error)
 	// CreatePasswordResetRequest implements createPasswordResetRequest operation.
 	//
 	// This operation initiates a password reset process by creating a password reset request.
@@ -46,6 +53,13 @@ type Handler interface {
 	//
 	// DELETE /sessions
 	DeleteSession(ctx context.Context) (DeleteSessionRes, error)
+	// GetAudio implements getAudio operation.
+	//
+	// This operation streams an audio file with the given ID. The client can request the entire file or
+	// a specific byte range to enable partial downloads and streaming.
+	//
+	// GET /audios/{id}
+	GetAudio(ctx context.Context, params GetAudioParams) (GetAudioRes, error)
 	// ResetPassword implements resetPassword operation.
 	//
 	// This operation resets a user's password. The request requires a valid password reset code and a

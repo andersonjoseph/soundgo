@@ -1,0 +1,32 @@
+type: object
+
+required:
+  - id
+  - title
+  - createdAt
+  - playCount
+  - user
+  - status
+
+properties:
+  id:
+    type: string
+    pattern: '^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$'
+  title:
+    type: string
+    example: "My Awesome Audio"
+  description:
+    type: string
+    example: "A cool description here"
+  createdAt:
+    type: string
+    format: date-time
+  user:
+    type: string
+    pattern: '^[0-9a-fA-F]{8}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{4}\b-[0-9a-fA-F]{12}$'
+  status:
+    type: string
+    enum: ["published", "pending", "hidden"]
+  playCount:
+    type: integer
+    minimum: 0

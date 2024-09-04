@@ -16,19 +16,22 @@ type Entity struct {
 }
 
 type Handler struct {
-	repository Repository
-	logger     *slog.Logger
-	hasher     shared.PasswordHasher
+	repository            Repository
+	logger                *slog.Logger
+	hasher                shared.PasswordHasher
+	contextRequestHandler shared.RequestContextHandler
 }
 
 func NewHandler(
 	repository Repository,
 	logger *slog.Logger,
 	hasher shared.PasswordHasher,
+	contextRequestHandler shared.RequestContextHandler,
 ) Handler {
 	return Handler{
-		repository: repository,
-		logger:     logger,
-		hasher:     hasher,
+		repository:            repository,
+		logger:                logger,
+		hasher:                hasher,
+		contextRequestHandler: contextRequestHandler,
 	}
 }

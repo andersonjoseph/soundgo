@@ -3,10 +3,182 @@
 package api
 
 import (
+	"io"
 	"time"
 
 	"github.com/go-faster/errors"
+
+	ht "github.com/ogen-go/ogen/http"
 )
+
+// Ref: #/components/schemas/audio
+type Audio struct {
+	ID          string      `json:"id"`
+	Title       string      `json:"title"`
+	Description OptString   `json:"description"`
+	CreatedAt   time.Time   `json:"createdAt"`
+	User        string      `json:"user"`
+	Status      AudioStatus `json:"status"`
+	PlayCount   int         `json:"playCount"`
+}
+
+// GetID returns the value of ID.
+func (s *Audio) GetID() string {
+	return s.ID
+}
+
+// GetTitle returns the value of Title.
+func (s *Audio) GetTitle() string {
+	return s.Title
+}
+
+// GetDescription returns the value of Description.
+func (s *Audio) GetDescription() OptString {
+	return s.Description
+}
+
+// GetCreatedAt returns the value of CreatedAt.
+func (s *Audio) GetCreatedAt() time.Time {
+	return s.CreatedAt
+}
+
+// GetUser returns the value of User.
+func (s *Audio) GetUser() string {
+	return s.User
+}
+
+// GetStatus returns the value of Status.
+func (s *Audio) GetStatus() AudioStatus {
+	return s.Status
+}
+
+// GetPlayCount returns the value of PlayCount.
+func (s *Audio) GetPlayCount() int {
+	return s.PlayCount
+}
+
+// SetID sets the value of ID.
+func (s *Audio) SetID(val string) {
+	s.ID = val
+}
+
+// SetTitle sets the value of Title.
+func (s *Audio) SetTitle(val string) {
+	s.Title = val
+}
+
+// SetDescription sets the value of Description.
+func (s *Audio) SetDescription(val OptString) {
+	s.Description = val
+}
+
+// SetCreatedAt sets the value of CreatedAt.
+func (s *Audio) SetCreatedAt(val time.Time) {
+	s.CreatedAt = val
+}
+
+// SetUser sets the value of User.
+func (s *Audio) SetUser(val string) {
+	s.User = val
+}
+
+// SetStatus sets the value of Status.
+func (s *Audio) SetStatus(val AudioStatus) {
+	s.Status = val
+}
+
+// SetPlayCount sets the value of PlayCount.
+func (s *Audio) SetPlayCount(val int) {
+	s.PlayCount = val
+}
+
+func (*Audio) createAudioRes() {}
+
+// Ref: #/components/schemas/audio-input
+type AudioInputMultipart struct {
+	// The audio file to upload.
+	File        ht.MultipartFile `json:"file"`
+	Title       string           `json:"title"`
+	Description OptString        `json:"description"`
+}
+
+// GetFile returns the value of File.
+func (s *AudioInputMultipart) GetFile() ht.MultipartFile {
+	return s.File
+}
+
+// GetTitle returns the value of Title.
+func (s *AudioInputMultipart) GetTitle() string {
+	return s.Title
+}
+
+// GetDescription returns the value of Description.
+func (s *AudioInputMultipart) GetDescription() OptString {
+	return s.Description
+}
+
+// SetFile sets the value of File.
+func (s *AudioInputMultipart) SetFile(val ht.MultipartFile) {
+	s.File = val
+}
+
+// SetTitle sets the value of Title.
+func (s *AudioInputMultipart) SetTitle(val string) {
+	s.Title = val
+}
+
+// SetDescription sets the value of Description.
+func (s *AudioInputMultipart) SetDescription(val OptString) {
+	s.Description = val
+}
+
+type AudioStatus string
+
+const (
+	AudioStatusPublished AudioStatus = "published"
+	AudioStatusPending   AudioStatus = "pending"
+	AudioStatusHidden    AudioStatus = "hidden"
+)
+
+// AllValues returns all AudioStatus values.
+func (AudioStatus) AllValues() []AudioStatus {
+	return []AudioStatus{
+		AudioStatusPublished,
+		AudioStatusPending,
+		AudioStatusHidden,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s AudioStatus) MarshalText() ([]byte, error) {
+	switch s {
+	case AudioStatusPublished:
+		return []byte(s), nil
+	case AudioStatusPending:
+		return []byte(s), nil
+	case AudioStatusHidden:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *AudioStatus) UnmarshalText(data []byte) error {
+	switch AudioStatus(data) {
+	case AudioStatusPublished:
+		*s = AudioStatusPublished
+		return nil
+	case AudioStatusPending:
+		*s = AudioStatusPending
+		return nil
+	case AudioStatusHidden:
+		*s = AudioStatusHidden
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
 
 type BearerAuth struct {
 	Token string
@@ -158,6 +330,38 @@ func (s *Conflict) SetError(val string) {
 
 func (*Conflict) updateUserRes() {}
 
+type CreateAudioBadRequest struct {
+	Error OptString `json:"error"`
+}
+
+// GetError returns the value of Error.
+func (s *CreateAudioBadRequest) GetError() OptString {
+	return s.Error
+}
+
+// SetError sets the value of Error.
+func (s *CreateAudioBadRequest) SetError(val OptString) {
+	s.Error = val
+}
+
+func (*CreateAudioBadRequest) createAudioRes() {}
+
+type CreateAudioUnsupportedMediaType struct {
+	Error OptString `json:"error"`
+}
+
+// GetError returns the value of Error.
+func (s *CreateAudioUnsupportedMediaType) GetError() OptString {
+	return s.Error
+}
+
+// SetError sets the value of Error.
+func (s *CreateAudioUnsupportedMediaType) SetError(val OptString) {
+	s.Error = val
+}
+
+func (*CreateAudioUnsupportedMediaType) createAudioRes() {}
+
 type CreatePasswordResetRequestBadRequest struct {
 	Error string `json:"error"`
 }
@@ -232,6 +436,133 @@ func (s *Forbidden) SetError(val string) {
 
 func (*Forbidden) updateUserRes() {}
 
+type GetAudioNotFound struct {
+	Error OptString `json:"error"`
+}
+
+// GetError returns the value of Error.
+func (s *GetAudioNotFound) GetError() OptString {
+	return s.Error
+}
+
+// SetError sets the value of Error.
+func (s *GetAudioNotFound) SetError(val OptString) {
+	s.Error = val
+}
+
+func (*GetAudioNotFound) getAudioRes() {}
+
+type GetAudioOK struct {
+	Data io.Reader
+}
+
+// Read reads data from the Data reader.
+//
+// Kept to satisfy the io.Reader interface.
+func (s GetAudioOK) Read(p []byte) (n int, err error) {
+	if s.Data == nil {
+		return 0, io.EOF
+	}
+	return s.Data.Read(p)
+}
+
+// GetAudioOKHeaders wraps GetAudioOK with response headers.
+type GetAudioOKHeaders struct {
+	AcceptRanges OptString
+	Response     GetAudioOK
+}
+
+// GetAcceptRanges returns the value of AcceptRanges.
+func (s *GetAudioOKHeaders) GetAcceptRanges() OptString {
+	return s.AcceptRanges
+}
+
+// GetResponse returns the value of Response.
+func (s *GetAudioOKHeaders) GetResponse() GetAudioOK {
+	return s.Response
+}
+
+// SetAcceptRanges sets the value of AcceptRanges.
+func (s *GetAudioOKHeaders) SetAcceptRanges(val OptString) {
+	s.AcceptRanges = val
+}
+
+// SetResponse sets the value of Response.
+func (s *GetAudioOKHeaders) SetResponse(val GetAudioOK) {
+	s.Response = val
+}
+
+func (*GetAudioOKHeaders) getAudioRes() {}
+
+type GetAudioPartialContent struct {
+	Data io.Reader
+}
+
+// Read reads data from the Data reader.
+//
+// Kept to satisfy the io.Reader interface.
+func (s GetAudioPartialContent) Read(p []byte) (n int, err error) {
+	if s.Data == nil {
+		return 0, io.EOF
+	}
+	return s.Data.Read(p)
+}
+
+// GetAudioPartialContentHeaders wraps GetAudioPartialContent with response headers.
+type GetAudioPartialContentHeaders struct {
+	AcceptRanges OptString
+	ContentRange OptString
+	Response     GetAudioPartialContent
+}
+
+// GetAcceptRanges returns the value of AcceptRanges.
+func (s *GetAudioPartialContentHeaders) GetAcceptRanges() OptString {
+	return s.AcceptRanges
+}
+
+// GetContentRange returns the value of ContentRange.
+func (s *GetAudioPartialContentHeaders) GetContentRange() OptString {
+	return s.ContentRange
+}
+
+// GetResponse returns the value of Response.
+func (s *GetAudioPartialContentHeaders) GetResponse() GetAudioPartialContent {
+	return s.Response
+}
+
+// SetAcceptRanges sets the value of AcceptRanges.
+func (s *GetAudioPartialContentHeaders) SetAcceptRanges(val OptString) {
+	s.AcceptRanges = val
+}
+
+// SetContentRange sets the value of ContentRange.
+func (s *GetAudioPartialContentHeaders) SetContentRange(val OptString) {
+	s.ContentRange = val
+}
+
+// SetResponse sets the value of Response.
+func (s *GetAudioPartialContentHeaders) SetResponse(val GetAudioPartialContent) {
+	s.Response = val
+}
+
+func (*GetAudioPartialContentHeaders) getAudioRes() {}
+
+type GetAudioRequestedRangeNotSatisfiable struct {
+	Error OptString `json:"error"`
+}
+
+// GetError returns the value of Error.
+func (s *GetAudioRequestedRangeNotSatisfiable) GetError() OptString {
+	return s.Error
+}
+
+// SetError sets the value of Error.
+func (s *GetAudioRequestedRangeNotSatisfiable) SetError(val OptString) {
+	s.Error = val
+}
+
+func (*GetAudioRequestedRangeNotSatisfiable) getAudioRes() {}
+
 type NotFound struct {
 	Error string `json:"error"`
 }
@@ -247,6 +578,52 @@ func (s *NotFound) SetError(val string) {
 }
 
 func (*NotFound) updateUserRes() {}
+
+// NewOptString returns new OptString with value set to v.
+func NewOptString(v string) OptString {
+	return OptString{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptString is optional string.
+type OptString struct {
+	Value string
+	Set   bool
+}
+
+// IsSet returns true if OptString was set.
+func (o OptString) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptString) Reset() {
+	var v string
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptString) SetTo(v string) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptString) Get() (v string, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptString) Or(d string) string {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
 
 // Ref: #/components/schemas/password-reset-input
 type PasswordResetInput struct {

@@ -1,0 +1,20 @@
+type: object
+
+required:
+  - file
+  - title
+
+properties:
+  file:
+    type: string
+    format: binary
+    description: The audio file to upload
+  title:
+    type: string
+    example: "My Awesome Audio"
+    minLength: 3
+    maxLength: 100
+  description:
+    type: string
+    example: "A cool description here"
+    maxLength: 5000

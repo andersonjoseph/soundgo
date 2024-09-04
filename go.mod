@@ -6,17 +6,19 @@ require (
 	github.com/Masterminds/squirrel v1.5.4
 	github.com/brianvoe/gofakeit/v7 v7.0.4
 	github.com/elithrar/simple-scrypt v1.3.0
+	github.com/gabriel-vasile/mimetype v1.4.5
 	github.com/go-faster/errors v0.7.1
 	github.com/go-faster/jx v1.1.0
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.6.0
 	github.com/lestrrat-go/jwx/v2 v2.1.1
 	github.com/ogen-go/ogen v1.2.2
+	github.com/rs/cors v1.11.0
 	go.opentelemetry.io/otel v1.27.0
 	go.opentelemetry.io/otel/metric v1.27.0
 	go.opentelemetry.io/otel/trace v1.27.0
 	go.uber.org/multierr v1.11.0
-	golang.org/x/net v0.26.0
+	golang.org/x/net v0.27.0
 )
 
 require (
