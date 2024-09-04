@@ -48,8 +48,8 @@ func (r LocalFileRepository) Get(ctx context.Context, ID string) (File, error) {
 	}
 
 	return File{
-		Reader: file,
-		Size:   info.Size(),
+		File: file,
+		Size: info.Size(),
 	}, nil
 }
 

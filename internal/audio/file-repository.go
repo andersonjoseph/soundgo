@@ -11,8 +11,8 @@ type FileSaveInput struct {
 }
 
 type File struct {
-	Reader io.Reader
-	Size   int64
+	File io.ReadSeeker
+	Size int64
 }
 
 type FileRepository interface {
