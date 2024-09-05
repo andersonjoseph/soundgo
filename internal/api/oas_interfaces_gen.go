@@ -41,6 +41,10 @@ type ResetPasswordRes interface {
 	resetPasswordRes()
 }
 
+type UpdateAudioRes interface {
+	updateAudioRes()
+}
+
 type UpdateUserRes interface {
 	updateUserRes()
 }

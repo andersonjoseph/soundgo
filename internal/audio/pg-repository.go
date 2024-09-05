@@ -93,6 +93,27 @@ func (r PGRepository) Delete(ctx context.Context, ID string) (err error) {
 	return nil
 }
 
+func (r PGRepository) Update(ctx context.Context, ID string, i UpdateInput) (e Entity, err error) {
+	query, args, err := psql.
+		Update("audios").
+		Set("title", i.Title).
+		Set("description", i.Description).
+		Set("status", i.Status).
+		Suffix("RETURNING id, title, description, play_count, status, created_at, user_id").
+		Where("ID = ?", ID).
+		ToSql()
+
+	if err != nil {
+		return e, err
+	}
+
+	if err = r.db.QueryRow(ctx, query, args...).Scan(&e.ID, &e.Title, &e.Description, &e.Playcount, &e.Status, &e.CreatedAt, &e.UserID); err != nil {
+		return e, handlePgError(err)
+	}
+
+	return e, err
+}
+
 func handlePgError(err error) error {
 	var pgErr *pgconn.PgError
 

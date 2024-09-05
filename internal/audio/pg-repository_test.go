@@ -234,6 +234,104 @@ func TestDelete(t *testing.T) {
 
 }
 
+func TestUpdate(t *testing.T) {
+	pool := internaltest.GetPgPool(t)
+	userRepo := user.NewPGRepository(pool)
+	repo := NewPGRepository(pool)
+
+	audio := createRandomAudio(t, repo, userRepo)
+
+	type args struct {
+		ctx context.Context
+		id  string
+		i   UpdateInput
+	}
+
+	tests := []struct {
+		name string
+		args args
+		err  error
+	}{
+		{
+			name: "updating audio",
+			args: args{
+				ctx: context.TODO(),
+				id:  audio.ID,
+				i: UpdateInput{
+					Title:       gofakeit.BookTitle(),
+					Description: gofakeit.Name(),
+					Status:      api.UpdateAudioInputStatus(audio.Status),
+				},
+			},
+		},
+		{
+			name: "updating non existing audio",
+			args: args{
+				ctx: context.TODO(),
+				id:  internaltest.GenerateUUID(t),
+				i: UpdateInput{
+					Title:       gofakeit.BookTitle(),
+					Description: gofakeit.Name(),
+					Status:      api.UpdateAudioInputStatus(audio.Status),
+				},
+			},
+			err: shared.ErrNotFound,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			e, err := repo.Update(tt.args.ctx, tt.args.id, tt.args.i)
+			if !errors.Is(err, tt.err) {
+				t.Errorf("Test failed: err expected: %v. received: %v", tt.err, err)
+			}
+
+			if tt.err != nil {
+				return
+			}
+
+			if e.ID != tt.args.id {
+				t.Errorf("Test failed: ID expected: %v. received: %v", tt.args.id, e.ID)
+			}
+
+			if e.Title != tt.args.i.Title {
+				t.Errorf("Test failed: title expected: %v. received: %v", tt.args.i.Title, e.Title)
+			}
+
+			if e.Description != tt.args.i.Description {
+				t.Errorf("Test failed: Description expected: %v. received: %v", tt.args.i.Description, e.Description)
+			}
+
+			if e.UserID != audio.UserID {
+				t.Errorf("Test failed: UserID expected: %v. received: %v", audio.UserID, e.UserID)
+			}
+
+			expectedStatus, err := e.Status.MarshalText()
+			if err != nil {
+				t.Fatalf("Test failed: error while marshalling expected status: %v", err)
+			}
+			receviedStatus, err := tt.args.i.Status.MarshalText()
+			if err != nil {
+				t.Fatalf("Test failed: error while marshalling expected status: %v", err)
+			}
+
+			if string(expectedStatus) != string(receviedStatus) {
+				t.Errorf("Test failed: Status expected: %v. received: %v", tt.args.i.Status, e.Status)
+			}
+
+			if e.CreatedAt.IsZero() {
+				t.Errorf("Test failed: CreatedAt is Zero")
+			}
+
+			if e.Playcount != 0 {
+				t.Errorf("Test failed: initial playcount is not Zero")
+			}
+
+		})
+	}
+
+}
+
 func createRandomUser(t *testing.T, r user.PGRepository) user.Entity {
 	t.Helper()
 

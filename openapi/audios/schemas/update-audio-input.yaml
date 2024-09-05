@@ -1,0 +1,15 @@
+type: object
+
+properties:
+  title:
+    type: string
+    example: "My Awesome Audio"
+    minLength: 3
+    maxLength: 100
+  description:
+    type: string
+    example: "A cool description here"
+    maxLength: 5000
+  status:
+    type: string
+    enum: ["published", "hidden"]

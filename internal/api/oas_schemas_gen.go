@@ -94,6 +94,7 @@ func (s *Audio) SetPlayCount(val int) {
 
 func (*Audio) createAudioRes() {}
 func (*Audio) getAudioRes()    {}
+func (*Audio) updateAudioRes() {}
 
 // Ref: #/components/schemas/audio-input
 type AudioInputMultipart struct {
@@ -747,6 +748,52 @@ func (o OptString) Or(d string) string {
 	return d
 }
 
+// NewOptUpdateAudioInputStatus returns new OptUpdateAudioInputStatus with value set to v.
+func NewOptUpdateAudioInputStatus(v UpdateAudioInputStatus) OptUpdateAudioInputStatus {
+	return OptUpdateAudioInputStatus{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptUpdateAudioInputStatus is optional UpdateAudioInputStatus.
+type OptUpdateAudioInputStatus struct {
+	Value UpdateAudioInputStatus
+	Set   bool
+}
+
+// IsSet returns true if OptUpdateAudioInputStatus was set.
+func (o OptUpdateAudioInputStatus) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptUpdateAudioInputStatus) Reset() {
+	var v UpdateAudioInputStatus
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptUpdateAudioInputStatus) SetTo(v UpdateAudioInputStatus) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptUpdateAudioInputStatus) Get() (v UpdateAudioInputStatus, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptUpdateAudioInputStatus) Or(d UpdateAudioInputStatus) UpdateAudioInputStatus {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
+
 // Ref: #/components/schemas/password-reset-input
 type PasswordResetInput struct {
 	Code     string `json:"code"`
@@ -880,6 +927,132 @@ func (s *Unauthorized) SetError(val string) {
 func (*Unauthorized) createSessionRes() {}
 func (*Unauthorized) deleteSessionRes() {}
 func (*Unauthorized) updateUserRes()    {}
+
+type UpdateAudioBadRequest struct {
+	Error OptString `json:"error"`
+}
+
+// GetError returns the value of Error.
+func (s *UpdateAudioBadRequest) GetError() OptString {
+	return s.Error
+}
+
+// SetError sets the value of Error.
+func (s *UpdateAudioBadRequest) SetError(val OptString) {
+	s.Error = val
+}
+
+func (*UpdateAudioBadRequest) updateAudioRes() {}
+
+type UpdateAudioForbidden struct {
+	Error OptString `json:"error"`
+}
+
+// GetError returns the value of Error.
+func (s *UpdateAudioForbidden) GetError() OptString {
+	return s.Error
+}
+
+// SetError sets the value of Error.
+func (s *UpdateAudioForbidden) SetError(val OptString) {
+	s.Error = val
+}
+
+func (*UpdateAudioForbidden) updateAudioRes() {}
+
+// Ref: #/components/schemas/update-audio-input
+type UpdateAudioInput struct {
+	Title       OptString                 `json:"title"`
+	Description OptString                 `json:"description"`
+	Status      OptUpdateAudioInputStatus `json:"status"`
+}
+
+// GetTitle returns the value of Title.
+func (s *UpdateAudioInput) GetTitle() OptString {
+	return s.Title
+}
+
+// GetDescription returns the value of Description.
+func (s *UpdateAudioInput) GetDescription() OptString {
+	return s.Description
+}
+
+// GetStatus returns the value of Status.
+func (s *UpdateAudioInput) GetStatus() OptUpdateAudioInputStatus {
+	return s.Status
+}
+
+// SetTitle sets the value of Title.
+func (s *UpdateAudioInput) SetTitle(val OptString) {
+	s.Title = val
+}
+
+// SetDescription sets the value of Description.
+func (s *UpdateAudioInput) SetDescription(val OptString) {
+	s.Description = val
+}
+
+// SetStatus sets the value of Status.
+func (s *UpdateAudioInput) SetStatus(val OptUpdateAudioInputStatus) {
+	s.Status = val
+}
+
+type UpdateAudioInputStatus string
+
+const (
+	UpdateAudioInputStatusPublished UpdateAudioInputStatus = "published"
+	UpdateAudioInputStatusHidden    UpdateAudioInputStatus = "hidden"
+)
+
+// AllValues returns all UpdateAudioInputStatus values.
+func (UpdateAudioInputStatus) AllValues() []UpdateAudioInputStatus {
+	return []UpdateAudioInputStatus{
+		UpdateAudioInputStatusPublished,
+		UpdateAudioInputStatusHidden,
+	}
+}
+
+// MarshalText implements encoding.TextMarshaler.
+func (s UpdateAudioInputStatus) MarshalText() ([]byte, error) {
+	switch s {
+	case UpdateAudioInputStatusPublished:
+		return []byte(s), nil
+	case UpdateAudioInputStatusHidden:
+		return []byte(s), nil
+	default:
+		return nil, errors.Errorf("invalid value: %q", s)
+	}
+}
+
+// UnmarshalText implements encoding.TextUnmarshaler.
+func (s *UpdateAudioInputStatus) UnmarshalText(data []byte) error {
+	switch UpdateAudioInputStatus(data) {
+	case UpdateAudioInputStatusPublished:
+		*s = UpdateAudioInputStatusPublished
+		return nil
+	case UpdateAudioInputStatusHidden:
+		*s = UpdateAudioInputStatusHidden
+		return nil
+	default:
+		return errors.Errorf("invalid value: %q", data)
+	}
+}
+
+type UpdateAudioNotFound struct {
+	Error OptString `json:"error"`
+}
+
+// GetError returns the value of Error.
+func (s *UpdateAudioNotFound) GetError() OptString {
+	return s.Error
+}
+
+// SetError sets the value of Error.
+func (s *UpdateAudioNotFound) SetError(val OptString) {
+	s.Error = val
+}
+
+func (*UpdateAudioNotFound) updateAudioRes() {}
 
 type UpdateUserBadRequest struct {
 	Error string `json:"error"`

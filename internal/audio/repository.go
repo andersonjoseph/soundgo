@@ -14,8 +14,15 @@ type SaveInput struct {
 	Status      api.AudioInputMultipartStatus
 }
 
+type UpdateInput struct {
+	Title       string
+	Description string
+	Status      api.UpdateAudioInputStatus
+}
+
 type Repository interface {
 	Save(ctx context.Context, i SaveInput) (Entity, error)
 	Get(context.Context, string) (Entity, error)
 	Delete(context.Context, string) error
+	Update(context.Context, string, UpdateInput) (Entity, error)
 }

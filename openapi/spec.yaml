@@ -50,6 +50,8 @@ paths:
       $ref: './audios/paths/get-audio.yaml'
     delete:
       $ref: './audios/paths/delete-audio.yaml'
+    patch:
+      $ref: './audios/paths/update-audio.yaml'
 
   '/audios/{id}/file':
     get:

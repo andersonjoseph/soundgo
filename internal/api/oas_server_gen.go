@@ -81,6 +81,12 @@ type Handler interface {
 	//
 	// PUT /password-reset
 	ResetPassword(ctx context.Context, req *PasswordResetInput) (ResetPasswordRes, error)
+	// UpdateAudio implements updateAudio operation.
+	//
+	// This operation allows the client to update an audio entity file.
+	//
+	// PATCH /audios/{id}
+	UpdateAudio(ctx context.Context, req *UpdateAudioInput, params UpdateAudioParams) (UpdateAudioRes, error)
 	// UpdateUser implements updateUser operation.
 	//
 	// This operation updates the details of an existing user in the system using the provided

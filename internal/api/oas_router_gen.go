@@ -107,8 +107,12 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							s.handleGetAudioRequest([1]string{
 								args[0],
 							}, elemIsEscaped, w, r)
+						case "PATCH":
+							s.handleUpdateAudioRequest([1]string{
+								args[0],
+							}, elemIsEscaped, w, r)
 						default:
-							s.notAllowed(w, r, "DELETE,GET")
+							s.notAllowed(w, r, "DELETE,GET,PATCH")
 						}
 
 						return
@@ -409,6 +413,14 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							r.name = "GetAudio"
 							r.summary = "Get audio"
 							r.operationID = "getAudio"
+							r.pathPattern = "/audios/{id}"
+							r.args = args
+							r.count = 1
+							return r, true
+						case "PATCH":
+							r.name = "UpdateAudio"
+							r.summary = "Update audio"
+							r.operationID = "updateAudio"
 							r.pathPattern = "/audios/{id}"
 							r.args = args
 							r.count = 1

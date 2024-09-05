@@ -116,6 +116,15 @@ func (UnimplementedHandler) ResetPassword(ctx context.Context, req *PasswordRese
 	return r, ht.ErrNotImplemented
 }
 
+// UpdateAudio implements updateAudio operation.
+//
+// This operation allows the client to update an audio entity file.
+//
+// PATCH /audios/{id}
+func (UnimplementedHandler) UpdateAudio(ctx context.Context, req *UpdateAudioInput, params UpdateAudioParams) (r UpdateAudioRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // UpdateUser implements updateUser operation.
 //
 // This operation updates the details of an existing user in the system using the provided
