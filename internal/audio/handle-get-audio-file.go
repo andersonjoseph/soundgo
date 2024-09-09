@@ -14,6 +14,21 @@ import (
 
 // GET /audios/{id}/file
 func (h Handler) GetAudioFile(ctx context.Context, params api.GetAudioFileParams) (api.GetAudioFileRes, error) {
+	e, err := h.repository.Get(ctx, params.ID)
+	if errors.Is(err, shared.ErrNotFound) {
+		return &api.GetAudioFileNotFound{}, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+
+	if e.Status == api.AudioStatusHidden {
+		currentUserID, err := h.contextRequestHandler.GetUserID(ctx)
+		if err != nil || currentUserID != e.UserID {
+			return &api.GetAudioFileForbidden{}, nil
+		}
+	}
+
 	audioFile, err := h.fileRepository.Get(ctx, params.ID)
 	if errors.Is(err, shared.ErrNotFound) {
 		return &api.GetAudioFileNotFound{}, nil

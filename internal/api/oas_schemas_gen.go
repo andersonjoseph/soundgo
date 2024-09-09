@@ -527,6 +527,22 @@ func (s *Forbidden) SetError(val string) {
 
 func (*Forbidden) updateUserRes() {}
 
+type GetAudioFileForbidden struct {
+	Error OptString `json:"error"`
+}
+
+// GetError returns the value of Error.
+func (s *GetAudioFileForbidden) GetError() OptString {
+	return s.Error
+}
+
+// SetError sets the value of Error.
+func (s *GetAudioFileForbidden) SetError(val OptString) {
+	s.Error = val
+}
+
+func (*GetAudioFileForbidden) getAudioFileRes() {}
+
 type GetAudioFileNotFound struct {
 	Error OptString `json:"error"`
 }

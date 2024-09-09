@@ -84,3 +84,13 @@ responses:
             error:
               type: string
               example: "Requested Range Not Satisfiable"
+  '403':
+    description: Forbidden access
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            error:
+              type: string
+              example: "Access to this audio is forbidden"
