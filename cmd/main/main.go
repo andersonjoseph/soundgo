@@ -102,12 +102,14 @@ func main() {
 	defer pool.Close()
 
 	hasher := shared.ScryptHasher{}
+
 	userRepo := user.NewPGRepository(pool)
 	sessionRepo := session.NewPGRepository(pool)
+
 	JWTHandler := shared.JWTHandler{}
 	requestContextHandler := shared.RequestContextHandler{}
-
 	securityHandler := security.NewHandler(sessionRepo, JWTHandler, logger)
+
 	audiosPath, ok := os.LookupEnv("AUDIOS_PATH")
 	if !ok {
 		logger.Error("AUDIOS_PATH is not present on environment", "error", err)
@@ -153,6 +155,12 @@ func main() {
 	handler := cors.AllowAll().Handler(srv)
 
 	handler, err = hostInContextMiddleware(handler)
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
+	}
+
+	handler, err = clientFingerprintMiddleware(handler)
 	if err != nil {
 		logger.Error(err.Error())
 		os.Exit(1)

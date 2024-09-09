@@ -1,5 +1,5 @@
 docker compose --profile test up --wait -d
-docker compose exec -d soundgo_test bash -c 'go run ./cmd/main/main.go >> /proc/1/fd/1 2>&1'
+docker compose exec -d soundgo_test bash -c 'go run ./cmd/main/*.go >> /proc/1/fd/1 2>&1'
 sleep 3
 
 if [ -z ${FILES} ]
