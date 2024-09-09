@@ -11,6 +11,7 @@ import (
 	"github.com/andersonjoseph/soundgo/internal/audio"
 	"github.com/andersonjoseph/soundgo/internal/health"
 	"github.com/andersonjoseph/soundgo/internal/password"
+	"github.com/andersonjoseph/soundgo/internal/reqcontext"
 	"github.com/andersonjoseph/soundgo/internal/security"
 	"github.com/andersonjoseph/soundgo/internal/session"
 	"github.com/andersonjoseph/soundgo/internal/shared"
@@ -107,7 +108,7 @@ func main() {
 	sessionRepo := session.NewPGRepository(pool)
 
 	JWTHandler := shared.JWTHandler{}
-	requestContextHandler := shared.RequestContextHandler{}
+	requestContextHandler := reqcontext.Handler{}
 	securityHandler := security.NewHandler(sessionRepo, JWTHandler, logger)
 
 	audiosPath, ok := os.LookupEnv("AUDIOS_PATH")

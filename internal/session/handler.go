@@ -5,6 +5,7 @@ import (
 	"log/slog"
 
 	"github.com/andersonjoseph/soundgo/internal/api"
+	"github.com/andersonjoseph/soundgo/internal/reqcontext"
 	"github.com/andersonjoseph/soundgo/internal/shared"
 	"github.com/andersonjoseph/soundgo/internal/user"
 )
@@ -21,7 +22,7 @@ type Handler struct {
 	logger                *slog.Logger
 	hasher                shared.PasswordHasher
 	jwtHandler            shared.JWTHandler
-	contextRequestHandler shared.RequestContextHandler
+	contextRequestHandler reqcontext.Handler
 }
 
 func NewHandler(
@@ -30,7 +31,7 @@ func NewHandler(
 	hasher shared.PasswordHasher,
 	jwtHandler shared.JWTHandler,
 	logger *slog.Logger,
-	contextRequestHandler shared.RequestContextHandler,
+	contextRequestHandler reqcontext.Handler,
 ) Handler {
 	return Handler{
 		repository:            repository,

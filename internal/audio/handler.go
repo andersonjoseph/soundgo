@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/andersonjoseph/soundgo/internal/api"
-	"github.com/andersonjoseph/soundgo/internal/shared"
+	"github.com/andersonjoseph/soundgo/internal/reqcontext"
 )
 
 type Entity struct {
@@ -22,14 +22,14 @@ type Handler struct {
 	logger                *slog.Logger
 	repository            Repository
 	fileRepository        FileRepository
-	contextRequestHandler shared.RequestContextHandler
+	contextRequestHandler reqcontext.Handler
 }
 
 func NewHandler(
 	logger *slog.Logger,
 	repo Repository,
 	fileRepo FileRepository,
-	ctxReqHandler shared.RequestContextHandler,
+	ctxReqHandler reqcontext.Handler,
 ) Handler {
 	return Handler{
 		logger:                logger,

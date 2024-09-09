@@ -6,6 +6,7 @@ import (
 	"log/slog"
 
 	"github.com/andersonjoseph/soundgo/internal/api"
+	"github.com/andersonjoseph/soundgo/internal/reqcontext"
 	"github.com/andersonjoseph/soundgo/internal/session"
 	"github.com/andersonjoseph/soundgo/internal/shared"
 )
@@ -56,7 +57,7 @@ func (h Handler) HandleBearerAuth(ctx context.Context, operationName string, t a
 		return nil, err
 	}
 
-	ctxHandler := shared.RequestContextHandler{}
+	ctxHandler := reqcontext.Handler{}
 
 	ctx = ctxHandler.SetUserID(ctx, session.UserID)
 	ctx = ctxHandler.SetSessionID(ctx, session.ID)
