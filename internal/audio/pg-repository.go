@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/Masterminds/squirrel"
+	"github.com/andersonjoseph/soundgo/internal/api"
 	"github.com/andersonjoseph/soundgo/internal/shared"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
@@ -94,11 +95,14 @@ func (r PGRepository) Delete(ctx context.Context, ID string) (err error) {
 }
 
 func (r PGRepository) Update(ctx context.Context, ID string, i UpdateInput) (e Entity, err error) {
-	query, args, err := psql.
-		Update("audios").
-		Set("title", i.Title).
-		Set("description", i.Description).
-		Set("status", i.Status).
+	queryBuilder := psql.Update("audios")
+
+	updateIfNotZero(&queryBuilder, "title", i.Title)
+	updateIfNotZero(&queryBuilder, "description", i.Description)
+	updateIfNotZero(&queryBuilder, "status", i.Status)
+	updateIfNotZero(&queryBuilder, "play_count", i.PlayCount)
+
+	query, args, err := queryBuilder.
 		Suffix("RETURNING id, title, description, play_count, status, created_at, user_id").
 		Where("ID = ?", ID).
 		ToSql()
@@ -112,6 +116,21 @@ func (r PGRepository) Update(ctx context.Context, ID string, i UpdateInput) (e E
 	}
 
 	return e, err
+}
+
+func updateIfNotZero(builder *squirrel.UpdateBuilder, colName string, val any) {
+	switch t := val.(type) {
+	case string, api.UpdateAudioInputStatus:
+		if t != "" {
+			*builder = builder.Set(colName, val)
+		}
+	case uint64:
+		if t != 0 {
+			*builder = builder.Set(colName, val)
+		}
+	default:
+		panic(fmt.Sprintf("type: %v of value: %v cannot be checked for a zero-value", t, val))
+	}
 }
 
 func handlePgError(err error) error {

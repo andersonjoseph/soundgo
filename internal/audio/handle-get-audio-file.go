@@ -65,6 +65,8 @@ func (h Handler) GetAudioFile(ctx context.Context, params api.GetAudioFileParams
 		}
 	}
 
+	//h.playcountHandler.Add(userID, params.ID)
+
 	return res, nil
 }
 

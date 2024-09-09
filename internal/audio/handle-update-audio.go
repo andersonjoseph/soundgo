@@ -26,9 +26,9 @@ func (h Handler) UpdateAudio(ctx context.Context, req *api.UpdateAudioInput, par
 	}
 
 	a, err = h.repository.Update(ctx, params.ID, UpdateInput{
-		Title:       req.Title.Or(a.Title),
-		Description: req.Description.Or(a.Description),
-		Status:      req.Status.Or(api.UpdateAudioInputStatus(a.Status)),
+		Title:       req.Title.Value,
+		Description: req.Description.Value,
+		Status:      req.Status.Value,
 	})
 
 	if err != nil {

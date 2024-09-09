@@ -36,8 +36,7 @@ PATCH http://{{HOST}}:{{PORT}}/audios/{{audioID}}
 Authorization: Bearer {{token}}
 {
     "status": "hidden",
-    "title": "my now hidden audio",
-    "description": ""
+    "title": "my now hidden audio"
 }
 HTTP 200
 
@@ -47,5 +46,5 @@ Authorization: Bearer {{token}}
 HTTP 200
 [Asserts]
 jsonpath "$.title" == "my now hidden audio"
-jsonpath "$.description" == ""
+jsonpath "$.description" == "just a test"
 jsonpath "$.status" == "hidden"
