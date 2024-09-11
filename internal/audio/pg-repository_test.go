@@ -332,6 +332,67 @@ func TestUpdate(t *testing.T) {
 
 }
 
+func TestSavePlayCount(t *testing.T) {
+	pool := internaltest.GetPgPool(t)
+	userRepo := user.NewPGRepository(pool)
+	repo := NewPGRepository(pool)
+
+	type args struct {
+		ctx   context.Context
+		id    string
+		count uint64
+	}
+
+	tests := []struct {
+		name string
+		args args
+		err  error
+	}{
+		{
+			name: "incrementing play count",
+			args: args{
+				ctx:   context.TODO(),
+				id:    createRandomAudio(t, repo, userRepo).ID,
+				count: 1,
+			},
+		},
+		{
+			name: "incrementing play count by 10",
+			args: args{
+				ctx:   context.TODO(),
+				id:    createRandomAudio(t, repo, userRepo).ID,
+				count: 10,
+			},
+		},
+		{
+			name: "incrementing play count for non existing audio",
+			args: args{
+				ctx:   context.TODO(),
+				id:    internaltest.GenerateUUID(t),
+				count: 1,
+			},
+			err: shared.ErrNotFound,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			count, err := repo.SavePlayCount(tt.args.ctx, tt.args.id, tt.args.count)
+			if !errors.Is(err, tt.err) {
+				t.Errorf("Test failed: err expected: %v. received: %v", tt.err, err)
+			}
+
+			if tt.err != nil {
+				return
+			}
+
+			if count != tt.args.count {
+				t.Errorf("Test failed: count expected: %v. received: %v", tt.args.count, count)
+			}
+		})
+	}
+}
+
 func createRandomUser(t *testing.T, r user.PGRepository) user.Entity {
 	t.Helper()
 

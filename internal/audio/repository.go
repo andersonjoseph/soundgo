@@ -25,5 +25,5 @@ type Repository interface {
 	Save(ctx context.Context, i SaveInput) (Entity, error)
 	Get(context.Context, string) (Entity, error)
 	Delete(context.Context, string) error
-	Update(ctx context.Context, userID string, i UpdateInput) (Entity, error)
+	Update(ctx context.Context, audioID string, i UpdateInput) (Entity, error)
 }

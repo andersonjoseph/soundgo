@@ -35,6 +35,14 @@ func (h Handler) GetUserID(ctx context.Context) (string, error) {
 	return h.getValue(ctx, "user")
 }
 
+func (h Handler) SetClientFingerprint(ctx context.Context, fingerprint string) context.Context {
+	return h.setValue(ctx, "client-fingerprint", fingerprint)
+}
+
+func (h Handler) GetClientFingerprint(ctx context.Context) (string, error) {
+	return h.getValue(ctx, "client-fingerprint")
+}
+
 func (h Handler) SetHost(ctx context.Context, host string) context.Context {
 	return context.WithValue(ctx, "host", host)
 }

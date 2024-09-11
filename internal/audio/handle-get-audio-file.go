@@ -14,7 +14,7 @@ import (
 
 // GET /audios/{id}/file
 func (h Handler) GetAudioFile(ctx context.Context, params api.GetAudioFileParams) (api.GetAudioFileRes, error) {
-	e, err := h.repository.Get(ctx, params.ID)
+	audio, err := h.repository.Get(ctx, params.ID)
 	if errors.Is(err, shared.ErrNotFound) {
 		return &api.GetAudioFileNotFound{}, nil
 	}
@@ -22,9 +22,9 @@ func (h Handler) GetAudioFile(ctx context.Context, params api.GetAudioFileParams
 		return nil, err
 	}
 
-	if e.Status == api.AudioStatusHidden {
+	if audio.Status == api.AudioStatusHidden {
 		currentUserID, err := h.contextRequestHandler.GetUserID(ctx)
-		if err != nil || currentUserID != e.UserID {
+		if err != nil || currentUserID != audio.UserID {
 			return &api.GetAudioFileForbidden{}, nil
 		}
 	}
@@ -65,8 +65,19 @@ func (h Handler) GetAudioFile(ctx context.Context, params api.GetAudioFileParams
 		}
 	}
 
-	//h.playcountHandler.Add(userID, params.ID)
+	var playerID string
+	playerID, err = h.contextRequestHandler.GetUserID(ctx)
+	if err != nil {
+		playerID, err = h.contextRequestHandler.GetClientFingerprint(ctx)
+		if err != nil {
+			return nil, err
+		}
+	}
 
+	err = h.playCountHandler.Add(ctx, playerID, audio)
+	if err != nil {
+		return nil, err
+	}
 	return res, nil
 }
 

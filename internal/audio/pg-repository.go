@@ -118,6 +118,24 @@ func (r PGRepository) Update(ctx context.Context, ID string, i UpdateInput) (e E
 	return e, err
 }
 
+func (r PGRepository) SavePlayCount(ctx context.Context, ID string, count uint64) (uint64, error) {
+	query, args, err := psql.Update("audios").
+		Set("play_count", squirrel.Expr("play_count + ?", count)).
+		Suffix("RETURNING play_count").
+		Where("ID = ?", ID).
+		ToSql()
+
+	if err != nil {
+		return 0, err
+	}
+
+	if err = r.db.QueryRow(ctx, query, args...).Scan(&count); err != nil {
+		return 0, handlePgError(err)
+	}
+
+	return count, err
+}
+
 func updateIfNotZero(builder *squirrel.UpdateBuilder, colName string, val any) {
 	switch t := val.(type) {
 	case string, api.UpdateAudioInputStatus:

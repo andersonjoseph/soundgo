@@ -27,6 +27,7 @@ services:
       JWT_KEY: ${JWT_KEY}
       PORT: ${PORT}
       AUDIOS_PATH: ${AUDIOS_PATH}
+      PLAY_COUNT_SAVE_INTERVAL: ${PLAY_COUNT_SAVE_INTERVAL}
     ports:
       - ${PORT}:${PORT}
       - 8080:8080
@@ -73,6 +74,7 @@ services:
       PORT: ${TEST_PORT}
       HOST: ${TEST_HOST}
       AUDIOS_PATH: ${AUDIOS_PATH}
+      PLAY_COUNT_SAVE_INTERVAL: ${TEST_PLAY_COUNT_SAVE_INTERVAL}
     ports:
       - ${TEST_PORT}:${TEST_PORT}
   test_db:

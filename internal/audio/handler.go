@@ -1,6 +1,7 @@
 package audio
 
 import (
+	"context"
 	"log/slog"
 	"time"
 
@@ -18,11 +19,16 @@ type Entity struct {
 	CreatedAt   time.Time
 }
 
+type PlayCountHandler interface {
+	Add(ctx context.Context, userID string, audio Entity) error
+}
+
 type Handler struct {
 	logger                *slog.Logger
 	repository            Repository
 	fileRepository        FileRepository
 	contextRequestHandler reqcontext.Handler
+	playCountHandler      PlayCountHandler
 }
 
 func NewHandler(
@@ -30,11 +36,13 @@ func NewHandler(
 	repo Repository,
 	fileRepo FileRepository,
 	ctxReqHandler reqcontext.Handler,
+	playCountHandler PlayCountHandler,
 ) Handler {
 	return Handler{
 		logger:                logger,
 		repository:            repo,
 		fileRepository:        fileRepo,
 		contextRequestHandler: ctxReqHandler,
+		playCountHandler:      playCountHandler,
 	}
 }

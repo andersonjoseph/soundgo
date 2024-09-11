@@ -6,6 +6,8 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"strconv"
+	"time"
 
 	"github.com/andersonjoseph/soundgo/internal/api"
 	"github.com/andersonjoseph/soundgo/internal/audio"
@@ -105,11 +107,31 @@ func main() {
 	hasher := shared.ScryptHasher{}
 
 	userRepo := user.NewPGRepository(pool)
+	audioRepo := audio.NewPGRepository(pool)
 	sessionRepo := session.NewPGRepository(pool)
 
 	JWTHandler := shared.JWTHandler{}
 	requestContextHandler := reqcontext.Handler{}
 	securityHandler := security.NewHandler(sessionRepo, JWTHandler, logger)
+
+	if err != nil {
+		logger.Error("error creating big cache play count handler", "error", err)
+		os.Exit(1)
+	}
+
+	playCountSaveIntervalStr, ok := os.LookupEnv("PLAY_COUNT_SAVE_INTERVAL")
+	if !ok {
+		logger.Error("PLAY_COUNT_SAVE_INTERVAL is not present on environment", "error", err)
+		os.Exit(1)
+	}
+
+	playCountSaveInterval, err := strconv.ParseInt(playCountSaveIntervalStr, 10, 64)
+	if err != nil {
+		logger.Error("PLAY_COUNT_SAVE_INTERVAL is not a valid integer", "error", err)
+		os.Exit(1)
+	}
+
+	playCountHandler := audio.NewMemoryPlayCountHandler(context.Background(), 1<<17, audioRepo, time.Second*time.Duration(playCountSaveInterval))
 
 	audiosPath, ok := os.LookupEnv("AUDIOS_PATH")
 	if !ok {
@@ -141,9 +163,10 @@ func main() {
 		),
 		AudioHandler: audio.NewHandler(
 			logger,
-			audio.NewPGRepository(pool),
+			audioRepo,
 			audio.NewLocalFileRepository(audiosPath),
 			requestContextHandler,
+			playCountHandler,
 		),
 	}
 

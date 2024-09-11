@@ -1,8 +1,9 @@
 package main
 
 import (
-	"context"
 	"net/http"
+
+	"github.com/andersonjoseph/soundgo/internal/reqcontext"
 )
 
 func readUserIP(r *http.Request) string {
@@ -25,10 +26,8 @@ func getRequestFingerprint(r *http.Request) string {
 
 func clientFingerprintMiddleware(h http.Handler) (http.Handler, error) {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fingerprint := getRequestFingerprint(r)
-
 		ctx := r.Context()
-		ctx = context.WithValue(ctx, "client-fingerprint", fingerprint)
+		ctx = reqcontext.Handler{}.SetClientFingerprint(ctx, getRequestFingerprint(r))
 
 		h.ServeHTTP(w, r.WithContext(ctx))
 	}), nil
