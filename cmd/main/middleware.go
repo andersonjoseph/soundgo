@@ -1,38 +1,80 @@
 package main
 
 import (
+	"log/slog"
 	"net/http"
+	"time"
 
 	"github.com/andersonjoseph/soundgo/internal/api"
 	"github.com/andersonjoseph/soundgo/internal/reqcontext"
 	"github.com/andersonjoseph/soundgo/internal/shared"
 )
 
-func clientFingerprintMiddleware(s *api.Server) http.Handler {
+type RouteFinder interface {
+	FindRoute(method string, path string) (api.Route, bool)
+}
+
+func clientFingerprintMiddleware(h http.Handler, rf RouteFinder) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		route, ok := s.FindRoute(r.Method, r.URL.Path)
-		if !ok || route.Name() != "GetAudioFile" {
-			s.ServeHTTP(w, r)
+		route, ok := rf.FindRoute(r.Method, r.URL.Path)
+		if !ok || route.OperationID() != "getAudioFile" {
+			h.ServeHTTP(w, r)
 			return
 		}
 
 		ctx := r.Context()
 		ctx = reqcontext.ClientFingerprint.Set(ctx, getRequestFingerprint(r))
 
-		s.ServeHTTP(w, r.WithContext(ctx))
+		h.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
 
-func requestIDMiddleware(h http.Handler) http.Handler {
+type ResponseWriterWithStatus struct {
+	http.ResponseWriter
+	Status int
+}
+
+func (w *ResponseWriterWithStatus) WriteHeader(code int) {
+	w.Status = code
+	w.ResponseWriter.WriteHeader(code)
+}
+
+func LogRequestMiddlware(h http.Handler, rf RouteFinder, logger *slog.Logger) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
+		route, ok := rf.FindRoute(r.Method, r.URL.Path)
+		if !ok {
+			h.ServeHTTP(w, r)
+			return
+		}
+
 		id, err := shared.GenerateUUID()
 		if err != nil {
 			panic(err)
 		}
+		ctx := reqcontext.RequestID.Set(r.Context(), id)
 
-		ctx = reqcontext.RequestID.Set(ctx, id)
-		h.ServeHTTP(w, r.WithContext(ctx))
+		logger.Info(
+			"request received",
+			"ID", id,
+			"operation", route.OperationID(),
+			"path", route.PathPattern(),
+			"method", r.Method,
+		)
+
+		start := time.Now()
+		writerWithStatus := &ResponseWriterWithStatus{ResponseWriter: w}
+
+		h.ServeHTTP(writerWithStatus, r.WithContext(ctx))
+
+		logger.Info(
+			"response delivered",
+			"ID", id,
+			"operation", route.OperationID(),
+			"path", route.PathPattern(),
+			"method", r.Method,
+			"duration", time.Since(start),
+			"status_code", writerWithStatus.Status,
+		)
 	})
 }
 

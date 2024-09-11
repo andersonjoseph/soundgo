@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"io"
 	"log/slog"
 	"net/http"
 	"os"
@@ -18,6 +20,7 @@ import (
 	"github.com/andersonjoseph/soundgo/internal/shared"
 	"github.com/andersonjoseph/soundgo/internal/user"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/ogen-go/ogen/ogenerrors"
 	"github.com/rs/cors"
 )
 
@@ -64,6 +67,37 @@ func getPGURL() (string, error) {
 		envVars["DB_PORT"],
 		envVars["DB_NAME"],
 	), nil
+}
+
+func createErrorHandler(log *slog.Logger) ogenerrors.ErrorHandler {
+	return func(ctx context.Context, w http.ResponseWriter, r *http.Request, err error) {
+		var code = http.StatusInternalServerError
+		var ogenErr ogenerrors.Error
+
+		switch {
+		case errors.Is(err, shared.ErrAlreadyExists):
+			code = http.StatusConflict
+
+		case errors.Is(err, shared.ErrNotFound):
+			code = http.StatusNotFound
+
+		case errors.Is(err, shared.ErrBadInput):
+			code = http.StatusBadRequest
+
+		case errors.As(err, &ogenErr):
+			code = ogenErr.Code()
+		}
+		msg := err.Error()
+		log.Info(http.StatusText(code), "msg", msg)
+
+		if code == http.StatusInternalServerError {
+			log.Error("internal server error", "msg", msg)
+			msg = "Internal server error"
+		}
+
+		w.WriteHeader(code)
+		_, _ = io.WriteString(w, fmt.Sprintf(`{"error": "%v"}`, msg))
+	}
 }
 
 func getDBConnection() (*pgxpool.Pool, error) {
@@ -116,7 +150,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	playCountHandler := audio.NewMemoryPlayCountHandler(context.Background(), 1<<17, audioRepo, time.Second*time.Duration(playCountSaveInterval))
+	playCountHandler := audio.NewMemoryPlayCountHandler(context.Background(), 1<<17, audioRepo, time.Second*time.Duration(playCountSaveInterval), logger)
 
 	audiosPath, ok := os.LookupEnv("AUDIOS_PATH")
 	if !ok {
@@ -135,33 +169,31 @@ func main() {
 			userRepo,
 			hasher,
 			JWTHandler,
-			logger,
 		),
 		PasswordHandler: password.NewHandler(
 			password.NewPGRepository(pool),
 			userRepo,
 			hasher,
 			shared.NewFakeEmailSender(logger),
-			logger,
 		),
 		AudioHandler: audio.NewHandler(
-			logger,
 			audioRepo,
 			audio.NewLocalFileRepository(audiosPath),
 			playCountHandler,
 		),
 	}
 
-	srv, err := api.NewServer(h, securityHandler)
+	srv, err := api.NewServer(h, securityHandler, api.WithErrorHandler(createErrorHandler(logger)))
+
 	if err != nil {
 		logger.Error("error creating app server", "error", err)
 		os.Exit(1)
 	}
 
-	var handler http.Handler
-	handler = clientFingerprintMiddleware(srv)
+	var handler http.Handler = srv
+	handler = LogRequestMiddlware(srv, srv, logger)
 
-	handler = requestIDMiddleware(handler)
+	handler = clientFingerprintMiddleware(handler, srv)
 	handler = cors.AllowAll().Handler(handler)
 
 	port, ok := os.LookupEnv("PORT")

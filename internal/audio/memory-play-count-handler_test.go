@@ -3,6 +3,8 @@ package audio
 import (
 	"context"
 	"fmt"
+	"io"
+	"log/slog"
 	"testing"
 	"time"
 
@@ -81,9 +83,10 @@ func TestMemoryPlayCountHandler_Add(t *testing.T) {
 		},
 	}
 
+	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			countHandler := NewMemoryPlayCountHandler(context.TODO(), tt.size, tt.repo, tt.interval)
+			countHandler := NewMemoryPlayCountHandler(context.TODO(), tt.size, tt.repo, tt.interval, logger)
 
 			err := countHandler.Add(tt.args.ctx, tt.args.playerID, tt.args.audio)
 			if tt.wantErr != (err != nil) {

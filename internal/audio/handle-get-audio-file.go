@@ -2,7 +2,6 @@ package audio
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	"strings"
@@ -10,15 +9,11 @@ import (
 	"github.com/andersonjoseph/soundgo/internal/api"
 	"github.com/andersonjoseph/soundgo/internal/audio/audiorange"
 	"github.com/andersonjoseph/soundgo/internal/reqcontext"
-	"github.com/andersonjoseph/soundgo/internal/shared"
 )
 
 // GET /audios/{id}/file
 func (h Handler) GetAudioFile(ctx context.Context, params api.GetAudioFileParams) (api.GetAudioFileRes, error) {
 	audio, err := h.repository.Get(ctx, params.ID)
-	if errors.Is(err, shared.ErrNotFound) {
-		return &api.GetAudioFileNotFound{}, nil
-	}
 	if err != nil {
 		return nil, err
 	}
@@ -31,9 +26,6 @@ func (h Handler) GetAudioFile(ctx context.Context, params api.GetAudioFileParams
 	}
 
 	audioFile, err := h.fileRepository.Get(ctx, params.ID)
-	if errors.Is(err, shared.ErrNotFound) {
-		return &api.GetAudioFileNotFound{}, nil
-	}
 	if err != nil {
 		return nil, err
 	}

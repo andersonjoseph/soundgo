@@ -1,10 +1,6 @@
 package session
 
 import (
-	"errors"
-	"log/slog"
-
-	"github.com/andersonjoseph/soundgo/internal/api"
 	"github.com/andersonjoseph/soundgo/internal/shared"
 	"github.com/andersonjoseph/soundgo/internal/user"
 )
@@ -18,7 +14,6 @@ type Entity struct {
 type Handler struct {
 	repository     Repository
 	userRepository user.Repository
-	logger         *slog.Logger
 	hasher         shared.PasswordHasher
 	jwtHandler     shared.JWTHandler
 }
@@ -28,43 +23,11 @@ func NewHandler(
 	userRepository user.Repository,
 	hasher shared.PasswordHasher,
 	jwtHandler shared.JWTHandler,
-	logger *slog.Logger,
 ) Handler {
 	return Handler{
 		repository:     repository,
 		userRepository: userRepository,
-		logger:         logger,
 		hasher:         hasher,
 		jwtHandler:     jwtHandler,
-	}
-}
-
-func (h Handler) handleError(err error) (api.CreateSessionRes, error) {
-	switch {
-	case errors.Is(err, shared.ErrUnauthorized):
-		h.logger.Info(
-			"unauthorized",
-			"msg",
-			err.Error(),
-			slog.Group(
-				"http_info",
-				"status",
-				401,
-			),
-		)
-		return &api.Unauthorized{}, nil
-
-	default:
-		h.logger.Info(
-			"internal server error",
-			"msg",
-			err.Error(),
-			slog.Group(
-				"http_info",
-				"status",
-				500,
-			),
-		)
-		return nil, err
 	}
 }

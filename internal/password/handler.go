@@ -5,7 +5,6 @@ import (
 	"crypto/rand"
 	"errors"
 	"fmt"
-	"log/slog"
 	"time"
 
 	"github.com/andersonjoseph/soundgo/internal/api"
@@ -16,7 +15,6 @@ import (
 type Handler struct {
 	userRepository user.Repository
 	repository     Repository
-	logger         *slog.Logger
 	hasher         shared.PasswordHasher
 	emailSender    shared.EmailSender
 }
@@ -33,26 +31,17 @@ func NewHandler(
 	userRepo user.Repository,
 	hasher shared.PasswordHasher,
 	emailSender shared.EmailSender,
-	logger *slog.Logger,
 ) Handler {
 	return Handler{
 		repository:     repo,
 		userRepository: userRepo,
 		hasher:         hasher,
 		emailSender:    emailSender,
-		logger:         logger,
 	}
 }
 
 // POST /password-reset
 func (h Handler) CreatePasswordResetRequest(ctx context.Context, req *api.PasswordResetRequestInput) (api.CreatePasswordResetRequestRes, error) {
-	h.logger.Info("requesting password reset",
-		slog.Group(
-			"input",
-			"email",
-			req.Email,
-		),
-	)
 	user, err := h.userRepository.GetByEmail(ctx, req.Email)
 
 	if errors.Is(err, shared.ErrNotFound) {

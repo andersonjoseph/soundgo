@@ -2,8 +2,6 @@ package user
 
 import (
 	"context"
-	"errors"
-	"log/slog"
 
 	"github.com/andersonjoseph/soundgo/internal/api"
 	"github.com/andersonjoseph/soundgo/internal/shared"
@@ -11,22 +9,14 @@ import (
 
 // POST /users
 func (h Handler) CreateUser(ctx context.Context, req *api.UserInput) (api.CreateUserRes, error) {
-	h.logger.Info("received user creation request",
-		slog.Group(
-			"input",
-			"username", req.Username,
-			"email", req.Email,
-		),
-	)
-
 	userToSave, err := h.userInputToSaveInput(*req)
 	if err != nil {
-		return handleError(err)
+		return nil, err
 	}
 
 	savedUser, err := h.repository.Save(ctx, userToSave)
 	if err != nil {
-		return handleError(err)
+		return nil, err
 	}
 
 	return &api.User{
@@ -35,16 +25,6 @@ func (h Handler) CreateUser(ctx context.Context, req *api.UserInput) (api.Create
 		Email:     savedUser.Email,
 		CreatedAt: savedUser.CreatedAt,
 	}, nil
-}
-
-func handleError(err error) (api.CreateUserRes, error) {
-	switch {
-	case errors.Is(err, shared.ErrAlreadyExists):
-		return &api.CreateUserConflict{Error: ""}, nil
-
-	default:
-		return nil, err
-	}
 }
 
 func (h Handler) userInputToSaveInput(ui api.UserInput) (SaveInput, error) {

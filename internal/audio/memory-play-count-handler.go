@@ -2,6 +2,7 @@ package audio
 
 import (
 	"context"
+	"log/slog"
 	"strings"
 	"sync"
 	"time"
@@ -12,27 +13,32 @@ type playCountRepository interface {
 }
 
 type memoryPlayCountHandler struct {
-	set   *safeSet
-	repo  playCountRepository
-	errCh chan error
+	set    *safeSet
+	repo   playCountRepository
+	errCh  chan error
+	logger *slog.Logger
 }
 
-func NewMemoryPlayCountHandler(ctx context.Context, size uint64, repo playCountRepository, saveInterval time.Duration) memoryPlayCountHandler {
+func NewMemoryPlayCountHandler(ctx context.Context, size uint64, repo playCountRepository, saveInterval time.Duration, logger *slog.Logger) memoryPlayCountHandler {
 	set := newSafeSet(size)
 	errCh := make(chan error)
 
 	go func() {
-		t := time.NewTicker(saveInterval)
-		defer t.Stop()
+		ticker := time.NewTicker(saveInterval)
+		defer ticker.Stop()
 
+		logger.Info("play count store scheduling started")
 		for {
 			select {
 			case <-ctx.Done():
+				logger.Info("play count store scheduling stopped")
 				return
 
-			case <-t.C:
+			case <-ticker.C:
+				logger.Info("processing play counts")
 				err := processCounts(ctx, &set, repo)
 				if err != nil {
+					logger.Error("error while processing counts in", "msg", err.Error())
 					errCh <- err
 				}
 			}
@@ -40,9 +46,10 @@ func NewMemoryPlayCountHandler(ctx context.Context, size uint64, repo playCountR
 	}()
 
 	return memoryPlayCountHandler{
-		set:   &set,
-		repo:  repo,
-		errCh: errCh,
+		set:    &set,
+		repo:   repo,
+		errCh:  errCh,
+		logger: logger,
 	}
 }
 
@@ -50,8 +57,10 @@ func (h memoryPlayCountHandler) Add(ctx context.Context, playerID string, audio 
 	hasSpace := h.set.add(audio.ID + ":" + playerID)
 
 	if !hasSpace {
+		h.logger.Info("play count store is full, processing play counts", "size", h.set.size())
 		err := processCounts(ctx, h.set, h.repo)
 		if err != nil {
+			h.logger.Error("error while processing count to clear play count store", "msg", err.Error())
 			return err
 		}
 		return h.Add(ctx, playerID, audio)

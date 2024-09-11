@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log/slog"
 
 	"github.com/andersonjoseph/soundgo/internal/api"
 	"github.com/andersonjoseph/soundgo/internal/shared"
@@ -12,22 +11,12 @@ import (
 )
 
 func (h Handler) CreateSession(ctx context.Context, req *api.SessionInput) (api.CreateSessionRes, error) {
-	h.logger.Info(
-		"creating session",
-		slog.Group(
-			"input",
-			"username",
-			req.Username,
-		),
-	)
 	u, err := h.userRepository.GetByUsername(ctx, req.Username)
+	if errors.Is(err, shared.ErrNotFound) {
+		return &api.Unauthorized{}, nil
+	}
 	if err != nil {
-		switch {
-		case errors.Is(err, shared.ErrNotFound):
-			h.handleError(shared.ErrUnauthorized)
-		default:
-			return h.handleError(fmt.Errorf("error while getting user by username: %w", err))
-		}
+		return nil, fmt.Errorf("error while getting session by username: %w", err)
 	}
 
 	if !h.hasher.Compare(u.Password, req.Password) {
@@ -36,15 +25,14 @@ func (h Handler) CreateSession(ctx context.Context, req *api.SessionInput) (api.
 
 	input, err := h.createSaveInput(u)
 	if err != nil {
-		return h.handleError(fmt.Errorf("error while creating save input: %w", err))
+		return nil, fmt.Errorf("error while creating save input: %w", err)
 	}
 
 	session, err := h.repository.Save(ctx, input)
 	if err != nil {
-		return h.handleError(fmt.Errorf("error while saving session: %w", err))
+		return nil, fmt.Errorf("error while saving session: %w", err)
 	}
 
-	h.logger.Info("session created", "ID", session.ID)
 	return &api.Session{
 		Token: session.Token,
 	}, nil

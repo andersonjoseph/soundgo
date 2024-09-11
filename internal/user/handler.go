@@ -17,7 +17,6 @@ type Entity struct {
 
 type Handler struct {
 	repository Repository
-	logger     *slog.Logger
 	hasher     shared.PasswordHasher
 }
 
@@ -28,7 +27,6 @@ func NewHandler(
 ) Handler {
 	return Handler{
 		repository: repository,
-		logger:     logger,
 		hasher:     hasher,
 	}
 }
