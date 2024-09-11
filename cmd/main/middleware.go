@@ -4,15 +4,29 @@ import (
 	"net/http"
 
 	"github.com/andersonjoseph/soundgo/internal/reqcontext"
+	"github.com/andersonjoseph/soundgo/internal/shared"
 )
 
-func clientFingerprintMiddleware(h http.Handler) (http.Handler, error) {
+func clientFingerprintMiddleware(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		ctx = reqcontext.ClientFingerprint.Set(ctx, getRequestFingerprint(r))
 
 		h.ServeHTTP(w, r.WithContext(ctx))
-	}), nil
+	})
+}
+
+func requestIDMiddleware(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		id, err := shared.GenerateUUID()
+		if err != nil {
+			panic(err)
+		}
+
+		ctx = reqcontext.RequestID.Set(ctx, id)
+		h.ServeHTTP(w, r.WithContext(ctx))
+	})
 }
 
 func readUserIP(r *http.Request) string {

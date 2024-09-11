@@ -9,6 +9,7 @@ var (
 	SessionID         = value{key: "session"}
 	CurrentUserID     = value{key: "user"}
 	ClientFingerprint = value{key: "client-fingerprint"}
+	RequestID         = value{key: "request-id"}
 )
 
 type value struct {
