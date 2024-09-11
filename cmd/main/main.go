@@ -19,7 +19,6 @@ import (
 	"github.com/andersonjoseph/soundgo/internal/session"
 	"github.com/andersonjoseph/soundgo/internal/shared"
 	"github.com/andersonjoseph/soundgo/internal/user"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/ogen-go/ogen/ogenerrors"
 	"github.com/rs/cors"
 )
@@ -38,35 +37,6 @@ type serverHandler struct {
 	SessionHandler
 	HealthHandler
 	AudioHandler
-}
-
-func getPGURL() (string, error) {
-	envVars := map[string]string{
-		"DB_USER":     "",
-		"DB_PASSWORD": "",
-		"DB_HOST":     "",
-		"DB_NAME":     "",
-		"DB_PORT":     "",
-	}
-
-	for k := range envVars {
-		v, ok := os.LookupEnv(k)
-
-		if !ok {
-			return "", fmt.Errorf("%s is missing from environment", k)
-		}
-		envVars[k] = v
-	}
-
-	//postgresql://user:password@host:port/name
-	return fmt.Sprintf(
-		"postgresql://%s:%s@%s:%s/%s",
-		envVars["DB_USER"],
-		envVars["DB_PASSWORD"],
-		envVars["DB_HOST"],
-		envVars["DB_PORT"],
-		envVars["DB_NAME"],
-	), nil
 }
 
 func createErrorHandler(log *slog.Logger) ogenerrors.ErrorHandler {
@@ -100,43 +70,25 @@ func createErrorHandler(log *slog.Logger) ogenerrors.ErrorHandler {
 	}
 }
 
-func getDBConnection() (*pgxpool.Pool, error) {
-	url, err := getPGURL()
-	if err != nil {
-		return nil, err
-	}
-
-	pool, err := pgxpool.New(context.Background(), url)
-	if err != nil {
-		return nil, err
-	}
-
-	return pool, nil
-}
-
 func main() {
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 
-	pool, err := getDBConnection()
+	pool, err := getDBConnection(context.Background())
 	if err != nil {
 		logger.Error("error connecting to DB", "error", err)
 		os.Exit(1)
 	}
 	defer pool.Close()
 
-	hasher := shared.ScryptHasher{}
-
+	// repositories
 	userRepo := user.NewPGRepository(pool)
 	audioRepo := audio.NewPGRepository(pool)
 	sessionRepo := session.NewPGRepository(pool)
 
+	// service/handlers
+	hasher := shared.ScryptHasher{}
 	JWTHandler := shared.JWTHandler{}
 	securityHandler := security.NewHandler(sessionRepo, JWTHandler, logger)
-
-	if err != nil {
-		logger.Error("error creating big cache play count handler", "error", err)
-		os.Exit(1)
-	}
 
 	playCountSaveIntervalStr, ok := os.LookupEnv("PLAY_COUNT_SAVE_INTERVAL")
 	if !ok {
@@ -184,15 +136,15 @@ func main() {
 	}
 
 	srv, err := api.NewServer(h, securityHandler, api.WithErrorHandler(createErrorHandler(logger)))
-
 	if err != nil {
 		logger.Error("error creating app server", "error", err)
 		os.Exit(1)
 	}
 
+	// middlewares
 	var handler http.Handler = srv
-	handler = LogRequestMiddlware(srv, srv, logger)
 
+	handler = LogRequestMiddlware(handler, srv, logger)
 	handler = clientFingerprintMiddleware(handler, srv)
 	handler = cors.AllowAll().Handler(handler)
 
