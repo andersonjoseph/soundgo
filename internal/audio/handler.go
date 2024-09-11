@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/andersonjoseph/soundgo/internal/api"
-	"github.com/andersonjoseph/soundgo/internal/reqcontext"
 )
 
 type Entity struct {
@@ -24,25 +23,22 @@ type PlayCountHandler interface {
 }
 
 type Handler struct {
-	logger                *slog.Logger
-	repository            Repository
-	fileRepository        FileRepository
-	contextRequestHandler reqcontext.Handler
-	playCountHandler      PlayCountHandler
+	logger           *slog.Logger
+	repository       Repository
+	fileRepository   FileRepository
+	playCountHandler PlayCountHandler
 }
 
 func NewHandler(
 	logger *slog.Logger,
 	repo Repository,
 	fileRepo FileRepository,
-	ctxReqHandler reqcontext.Handler,
 	playCountHandler PlayCountHandler,
 ) Handler {
 	return Handler{
-		logger:                logger,
-		repository:            repo,
-		fileRepository:        fileRepo,
-		contextRequestHandler: ctxReqHandler,
-		playCountHandler:      playCountHandler,
+		logger:           logger,
+		repository:       repo,
+		fileRepository:   fileRepo,
+		playCountHandler: playCountHandler,
 	}
 }

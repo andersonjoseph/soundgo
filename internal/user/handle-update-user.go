@@ -6,6 +6,7 @@ import (
 	"log/slog"
 
 	"github.com/andersonjoseph/soundgo/internal/api"
+	"github.com/andersonjoseph/soundgo/internal/reqcontext"
 	"github.com/andersonjoseph/soundgo/internal/shared"
 )
 
@@ -19,7 +20,7 @@ func (h Handler) UpdateUser(ctx context.Context, req *api.UpdateUserInput, param
 		),
 	)
 
-	currentUserID, err := h.contextRequestHandler.GetUserID(ctx)
+	currentUserID, err := reqcontext.CurrentUserID.Get(ctx)
 	if err != nil {
 		return nil, err
 	}

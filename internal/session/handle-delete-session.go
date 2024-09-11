@@ -5,6 +5,7 @@ import (
 	"log/slog"
 
 	"github.com/andersonjoseph/soundgo/internal/api"
+	"github.com/andersonjoseph/soundgo/internal/reqcontext"
 )
 
 // DELETE /sessions
@@ -12,7 +13,7 @@ func (h Handler) DeleteSession(ctx context.Context) (api.DeleteSessionRes, error
 	h.logger.Info(
 		"deleting session",
 	)
-	session, err := h.contextRequestHandler.GetSessionID(ctx)
+	session, err := reqcontext.SessionID.Get(ctx)
 
 	if err != nil {
 		return nil, err

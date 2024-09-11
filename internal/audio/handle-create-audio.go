@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/andersonjoseph/soundgo/internal/api"
+	"github.com/andersonjoseph/soundgo/internal/reqcontext"
 	"github.com/andersonjoseph/soundgo/internal/shared"
 	"github.com/gabriel-vasile/mimetype"
 )
@@ -35,7 +36,7 @@ func (h Handler) CreateAudio(ctx context.Context, req *api.AudioInputMultipart) 
 		}
 	}()
 
-	userID, err := h.contextRequestHandler.GetUserID(ctx)
+	userID, err := reqcontext.CurrentUserID.Get(ctx)
 	if err != nil {
 		return nil, err
 	}

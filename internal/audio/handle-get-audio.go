@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/andersonjoseph/soundgo/internal/api"
+	"github.com/andersonjoseph/soundgo/internal/reqcontext"
 	"github.com/andersonjoseph/soundgo/internal/shared"
 )
 
@@ -18,7 +19,7 @@ func (h Handler) GetAudio(ctx context.Context, params api.GetAudioParams) (api.G
 	}
 
 	if e.Status == api.AudioStatusHidden {
-		currentUserID, err := h.contextRequestHandler.GetUserID(ctx)
+		currentUserID, err := reqcontext.CurrentUserID.Get(ctx)
 
 		if err != nil || currentUserID != e.UserID {
 			return &api.GetAudioForbidden{}, nil

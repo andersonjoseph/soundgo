@@ -5,48 +5,32 @@ import (
 	"fmt"
 )
 
-type Handler struct{}
+var (
+	SessionID         = value{key: "session"}
+	CurrentUserID     = value{key: "user"}
+	ClientFingerprint = value{key: "client-fingerprint"}
+)
 
-func (h Handler) getValue(ctx context.Context, k string) (string, error) {
+type value struct {
+	key string
+}
+
+func (v value) Get(ctx context.Context) (string, error) {
+	return getValue(ctx, v.key)
+}
+
+func (v value) Set(ctx context.Context, s string) context.Context {
+	return setValue(ctx, v.key, s)
+}
+
+func getValue(ctx context.Context, k string) (string, error) {
 	if v, ok := ctx.Value(k).(string); ok {
 		return v, nil
 	}
 
-	return "", fmt.Errorf("key: %s is not present in request context", k)
+	return "", fmt.Errorf("key: %s is not present in current context", k)
 }
 
-func (h Handler) setValue(ctx context.Context, k string, v string) context.Context {
+func setValue(ctx context.Context, k string, v string) context.Context {
 	return context.WithValue(ctx, k, v)
-}
-
-func (h Handler) SetSessionID(ctx context.Context, ID string) context.Context {
-	return h.setValue(ctx, "session", ID)
-}
-
-func (h Handler) GetSessionID(ctx context.Context) (string, error) {
-	return h.getValue(ctx, "session")
-}
-
-func (h Handler) SetUserID(ctx context.Context, ID string) context.Context {
-	return h.setValue(ctx, "user", ID)
-}
-
-func (h Handler) GetUserID(ctx context.Context) (string, error) {
-	return h.getValue(ctx, "user")
-}
-
-func (h Handler) SetClientFingerprint(ctx context.Context, fingerprint string) context.Context {
-	return h.setValue(ctx, "client-fingerprint", fingerprint)
-}
-
-func (h Handler) GetClientFingerprint(ctx context.Context) (string, error) {
-	return h.getValue(ctx, "client-fingerprint")
-}
-
-func (h Handler) SetHost(ctx context.Context, host string) context.Context {
-	return context.WithValue(ctx, "host", host)
-}
-
-func (h Handler) GetHost(ctx context.Context) (string, error) {
-	return h.getValue(ctx, "host")
 }

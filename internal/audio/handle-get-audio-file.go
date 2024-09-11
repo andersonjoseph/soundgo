@@ -9,6 +9,7 @@ import (
 
 	"github.com/andersonjoseph/soundgo/internal/api"
 	"github.com/andersonjoseph/soundgo/internal/audio/audiorange"
+	"github.com/andersonjoseph/soundgo/internal/reqcontext"
 	"github.com/andersonjoseph/soundgo/internal/shared"
 )
 
@@ -23,7 +24,7 @@ func (h Handler) GetAudioFile(ctx context.Context, params api.GetAudioFileParams
 	}
 
 	if audio.Status == api.AudioStatusHidden {
-		currentUserID, err := h.contextRequestHandler.GetUserID(ctx)
+		currentUserID, err := reqcontext.CurrentUserID.Get(ctx)
 		if err != nil || currentUserID != audio.UserID {
 			return &api.GetAudioFileForbidden{}, nil
 		}
@@ -66,9 +67,9 @@ func (h Handler) GetAudioFile(ctx context.Context, params api.GetAudioFileParams
 	}
 
 	var playerID string
-	playerID, err = h.contextRequestHandler.GetUserID(ctx)
+	playerID, err = reqcontext.CurrentUserID.Get(ctx)
 	if err != nil {
-		playerID, err = h.contextRequestHandler.GetClientFingerprint(ctx)
+		playerID, err = reqcontext.ClientFingerprint.Get(ctx)
 		if err != nil {
 			return nil, err
 		}

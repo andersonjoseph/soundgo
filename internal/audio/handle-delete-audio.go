@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/andersonjoseph/soundgo/internal/api"
+	"github.com/andersonjoseph/soundgo/internal/reqcontext"
 	"github.com/andersonjoseph/soundgo/internal/shared"
 )
 
@@ -17,7 +18,7 @@ func (h Handler) DeleteAudio(ctx context.Context, params api.DeleteAudioParams) 
 		return nil, err
 	}
 
-	currUser, err := h.contextRequestHandler.GetUserID(ctx)
+	currUser, err := reqcontext.CurrentUserID.Get(ctx)
 	if err != nil {
 		return nil, err
 	}

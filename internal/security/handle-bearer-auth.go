@@ -57,9 +57,7 @@ func (h Handler) HandleBearerAuth(ctx context.Context, operationName string, t a
 		return nil, err
 	}
 
-	ctxHandler := reqcontext.Handler{}
-
-	ctx = ctxHandler.SetUserID(ctx, session.UserID)
-	ctx = ctxHandler.SetSessionID(ctx, session.ID)
+	ctx = reqcontext.CurrentUserID.Set(ctx, session.UserID)
+	ctx = reqcontext.SessionID.Set(ctx, session.ID)
 	return ctx, nil
 }

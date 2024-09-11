@@ -13,7 +13,6 @@ import (
 	"github.com/andersonjoseph/soundgo/internal/audio"
 	"github.com/andersonjoseph/soundgo/internal/health"
 	"github.com/andersonjoseph/soundgo/internal/password"
-	"github.com/andersonjoseph/soundgo/internal/reqcontext"
 	"github.com/andersonjoseph/soundgo/internal/security"
 	"github.com/andersonjoseph/soundgo/internal/session"
 	"github.com/andersonjoseph/soundgo/internal/shared"
@@ -98,7 +97,6 @@ func main() {
 	sessionRepo := session.NewPGRepository(pool)
 
 	JWTHandler := shared.JWTHandler{}
-	requestContextHandler := reqcontext.Handler{}
 	securityHandler := security.NewHandler(sessionRepo, JWTHandler, logger)
 
 	if err != nil {
@@ -131,7 +129,6 @@ func main() {
 			userRepo,
 			logger,
 			hasher,
-			requestContextHandler,
 		),
 		SessionHandler: session.NewHandler(
 			sessionRepo,
@@ -139,7 +136,6 @@ func main() {
 			hasher,
 			JWTHandler,
 			logger,
-			requestContextHandler,
 		),
 		PasswordHandler: password.NewHandler(
 			password.NewPGRepository(pool),
@@ -152,7 +148,6 @@ func main() {
 			logger,
 			audioRepo,
 			audio.NewLocalFileRepository(audiosPath),
-			requestContextHandler,
 			playCountHandler,
 		),
 	}

@@ -9,7 +9,7 @@ import (
 func clientFingerprintMiddleware(h http.Handler) (http.Handler, error) {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
-		ctx = reqcontext.Handler{}.SetClientFingerprint(ctx, getRequestFingerprint(r))
+		ctx = reqcontext.ClientFingerprint.Set(ctx, getRequestFingerprint(r))
 
 		h.ServeHTTP(w, r.WithContext(ctx))
 	}), nil
@@ -27,8 +27,5 @@ func readUserIP(r *http.Request) string {
 }
 
 func getRequestFingerprint(r *http.Request) string {
-	ua := r.Header.Get("user-agent")
-	ip := readUserIP(r)
-
-	return ua + ip
+	return r.Header.Get("user-agent") + readUserIP(r)
 }
