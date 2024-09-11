@@ -158,9 +158,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	handler := cors.AllowAll().Handler(srv)
-	handler = clientFingerprintMiddleware(handler)
+	var handler http.Handler
+	handler = clientFingerprintMiddleware(srv)
+
 	handler = requestIDMiddleware(handler)
+	handler = cors.AllowAll().Handler(handler)
 
 	port, ok := os.LookupEnv("PORT")
 	if !ok {

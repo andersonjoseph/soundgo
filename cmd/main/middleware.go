@@ -3,16 +3,23 @@ package main
 import (
 	"net/http"
 
+	"github.com/andersonjoseph/soundgo/internal/api"
 	"github.com/andersonjoseph/soundgo/internal/reqcontext"
 	"github.com/andersonjoseph/soundgo/internal/shared"
 )
 
-func clientFingerprintMiddleware(h http.Handler) http.Handler {
+func clientFingerprintMiddleware(s *api.Server) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		route, ok := s.FindRoute(r.Method, r.URL.Path)
+		if !ok || route.Name() != "GetAudioFile" {
+			s.ServeHTTP(w, r)
+			return
+		}
+
 		ctx := r.Context()
 		ctx = reqcontext.ClientFingerprint.Set(ctx, getRequestFingerprint(r))
 
-		h.ServeHTTP(w, r.WithContext(ctx))
+		s.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
 
