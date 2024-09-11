@@ -38,19 +38,6 @@ type serverHandler struct {
 	AudioHandler
 }
 
-func hostInContextMiddleware(h http.Handler) (http.Handler, error) {
-	host, ok := os.LookupEnv("HOST")
-	if !ok {
-		return nil, fmt.Errorf("HOST is missing from environment")
-	}
-
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx := context.WithValue(r.Context(), "host", host)
-
-		h.ServeHTTP(w, r.WithContext(ctx))
-	}), nil
-}
-
 func getPGURL() (string, error) {
 	envVars := map[string]string{
 		"DB_USER":     "",
@@ -177,12 +164,6 @@ func main() {
 	}
 
 	handler := cors.AllowAll().Handler(srv)
-
-	handler, err = hostInContextMiddleware(handler)
-	if err != nil {
-		logger.Error(err.Error())
-		os.Exit(1)
-	}
 
 	handler, err = clientFingerprintMiddleware(handler)
 	if err != nil {

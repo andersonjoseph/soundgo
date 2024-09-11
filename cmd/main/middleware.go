@@ -6,6 +6,15 @@ import (
 	"github.com/andersonjoseph/soundgo/internal/reqcontext"
 )
 
+func clientFingerprintMiddleware(h http.Handler) (http.Handler, error) {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		ctx = reqcontext.Handler{}.SetClientFingerprint(ctx, getRequestFingerprint(r))
+
+		h.ServeHTTP(w, r.WithContext(ctx))
+	}), nil
+}
+
 func readUserIP(r *http.Request) string {
 	IPAddress := r.Header.Get("X-Real-Ip")
 	if IPAddress == "" {
@@ -22,13 +31,4 @@ func getRequestFingerprint(r *http.Request) string {
 	ip := readUserIP(r)
 
 	return ua + ip
-}
-
-func clientFingerprintMiddleware(h http.Handler) (http.Handler, error) {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
-		ctx = reqcontext.Handler{}.SetClientFingerprint(ctx, getRequestFingerprint(r))
-
-		h.ServeHTTP(w, r.WithContext(ctx))
-	}), nil
 }

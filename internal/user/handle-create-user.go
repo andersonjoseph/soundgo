@@ -11,7 +11,7 @@ import (
 
 // POST /users
 func (h Handler) CreateUser(ctx context.Context, req *api.UserInput) (api.CreateUserRes, error) {
-	h.logger.Info("creating user",
+	h.logger.Info("received user creation request",
 		slog.Group(
 			"input",
 			"username", req.Username,
