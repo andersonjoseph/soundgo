@@ -39,7 +39,11 @@ func NewMemoryPlayCountHandler(ctx context.Context, size uint64, repo playCountR
 				err := processCounts(ctx, &set, repo)
 				if err != nil {
 					logger.Error("error while processing counts in", "msg", err.Error())
-					errCh <- err
+					select {
+					case errCh <- err:
+					default:
+						logger.Warn("Failed to send error to channel, maybe it's not being consumed")
+					}
 				}
 			}
 		}
