@@ -8,8 +8,9 @@ description: |
 
 operationId: getAudioFile
 
-security: []
-
+security:
+  - {}
+  - bearerAuth: []
 parameters:
   - in: path
     name: id
