@@ -393,6 +393,133 @@ func TestSavePlayCount(t *testing.T) {
 	}
 }
 
+func TestGetByUser(t *testing.T) {
+	pool := internaltest.GetPgPool(t)
+	userRepo := user.NewPGRepository(pool)
+	repo := NewPGRepository(pool)
+
+	type args struct {
+		ctx    context.Context
+		userID string
+		after  string
+		limit  uint64
+	}
+
+	tests := []struct {
+		name  string
+		args  args
+		count int
+		err   error
+	}{
+		{
+			name:  "get audios by user",
+			count: 5,
+			args: args{
+				ctx:   context.TODO(),
+				after: "",
+				limit: 0,
+			},
+		},
+		{
+			name:  "get audios by user with limit",
+			count: 5,
+			args: args{
+				ctx:   context.TODO(),
+				after: "",
+				limit: 1,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			user := createRandomUser(t, userRepo)
+			tt.args.userID = user.ID
+
+			for i := 0; i < tt.count; i++ {
+				createAudio(t, repo, SaveInput{
+					ID:          internaltest.GenerateUUID(t),
+					Title:       gofakeit.BookTitle(),
+					Description: gofakeit.Name(),
+					UserID:      user.ID,
+					Status:      api.AudioInputMultipartStatusPublished,
+				})
+			}
+
+			audios, err := repo.GetByUser(tt.args.ctx, tt.args.userID, tt.args.after, tt.args.limit, false)
+			if !errors.Is(err, tt.err) {
+				t.Errorf("Test failed: err expected: %v. received: %v", tt.err, err)
+			}
+			if tt.err != nil {
+				return
+			}
+
+			if len(audios) != tt.count && len(audios) != int(tt.args.limit) {
+				t.Errorf("Test failed: audios length expected: %v. received: %v", tt.count, len(audios))
+			}
+		})
+	}
+}
+
+func TestGetByUserHidden(t *testing.T) {
+	pool := internaltest.GetPgPool(t)
+	userRepo := user.NewPGRepository(pool)
+	repo := NewPGRepository(pool)
+
+	type args struct {
+		ctx    context.Context
+		userID string
+		after  string
+		limit  uint64
+	}
+
+	tests := []struct {
+		name  string
+		args  args
+		count int
+		err   error
+	}{
+		{
+			name:  "get audios by user excluding hidden",
+			count: 5,
+			args: args{
+				ctx:   context.TODO(),
+				after: "",
+				limit: 0,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			user := createRandomUser(t, userRepo)
+			tt.args.userID = user.ID
+
+			for i := 0; i < tt.count; i++ {
+				createAudio(t, repo, SaveInput{
+					ID:          internaltest.GenerateUUID(t),
+					Title:       gofakeit.BookTitle(),
+					Description: gofakeit.Name(),
+					UserID:      user.ID,
+					Status:      api.AudioInputMultipartStatusHidden,
+				})
+			}
+
+			audios, err := repo.GetByUser(tt.args.ctx, tt.args.userID, tt.args.after, tt.args.limit, true)
+			if !errors.Is(err, tt.err) {
+				t.Errorf("Test failed: err expected: %v. received: %v", tt.err, err)
+			}
+			if tt.err != nil {
+				return
+			}
+
+			if len(audios) != 0 {
+				t.Errorf("Test failed: audios length expected: %v. received: %v", 0, len(audios))
+			}
+		})
+	}
+}
+
 func createRandomUser(t *testing.T, r user.PGRepository) user.Entity {
 	t.Helper()
 
@@ -410,20 +537,26 @@ func createRandomUser(t *testing.T, r user.PGRepository) user.Entity {
 	return u
 }
 
-func createRandomAudio(t *testing.T, repo PGRepository, userRepo user.PGRepository) Entity {
+func createAudio(t *testing.T, repo PGRepository, i SaveInput) Entity {
 	t.Helper()
 
-	a, err := repo.Save(context.TODO(), SaveInput{
-		ID:          internaltest.GenerateUUID(t),
-		Title:       gofakeit.BookTitle(),
-		Description: gofakeit.Name(),
-		UserID:      createRandomUser(t, userRepo).ID,
-		Status:      api.AudioInputMultipartStatusPublished,
-	})
+	a, err := repo.Save(context.TODO(), i)
 
 	if err != nil {
 		t.Fatalf("Test failed: error occured while creating test user. received: %v", err)
 	}
 
 	return a
+}
+
+func createRandomAudio(t *testing.T, repo PGRepository, userRepo user.PGRepository) Entity {
+	t.Helper()
+
+	return createAudio(t, repo, SaveInput{
+		ID:          internaltest.GenerateUUID(t),
+		Title:       gofakeit.BookTitle(),
+		Description: gofakeit.Name(),
+		UserID:      createRandomUser(t, userRepo).ID,
+		Status:      api.AudioInputMultipartStatusPublished,
+	})
 }

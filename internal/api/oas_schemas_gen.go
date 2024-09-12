@@ -702,6 +702,50 @@ func (s *GetAudioNotFound) SetError(val OptString) {
 
 func (*GetAudioNotFound) getAudioRes() {}
 
+type GetUserAudiosBadRequest struct {
+	Error OptString `json:"error"`
+}
+
+// GetError returns the value of Error.
+func (s *GetUserAudiosBadRequest) GetError() OptString {
+	return s.Error
+}
+
+// SetError sets the value of Error.
+func (s *GetUserAudiosBadRequest) SetError(val OptString) {
+	s.Error = val
+}
+
+func (*GetUserAudiosBadRequest) getUserAudiosRes() {}
+
+// GetUserAudiosOKHeaders wraps []Audio with response headers.
+type GetUserAudiosOKHeaders struct {
+	XPaginationNext OptString
+	Response        []Audio
+}
+
+// GetXPaginationNext returns the value of XPaginationNext.
+func (s *GetUserAudiosOKHeaders) GetXPaginationNext() OptString {
+	return s.XPaginationNext
+}
+
+// GetResponse returns the value of Response.
+func (s *GetUserAudiosOKHeaders) GetResponse() []Audio {
+	return s.Response
+}
+
+// SetXPaginationNext sets the value of XPaginationNext.
+func (s *GetUserAudiosOKHeaders) SetXPaginationNext(val OptString) {
+	s.XPaginationNext = val
+}
+
+// SetResponse sets the value of Response.
+func (s *GetUserAudiosOKHeaders) SetResponse(val []Audio) {
+	s.Response = val
+}
+
+func (*GetUserAudiosOKHeaders) getUserAudiosRes() {}
+
 type NotFound struct {
 	Error string `json:"error"`
 }
@@ -717,6 +761,52 @@ func (s *NotFound) SetError(val string) {
 }
 
 func (*NotFound) updateUserRes() {}
+
+// NewOptInt returns new OptInt with value set to v.
+func NewOptInt(v int) OptInt {
+	return OptInt{
+		Value: v,
+		Set:   true,
+	}
+}
+
+// OptInt is optional int.
+type OptInt struct {
+	Value int
+	Set   bool
+}
+
+// IsSet returns true if OptInt was set.
+func (o OptInt) IsSet() bool { return o.Set }
+
+// Reset unsets value.
+func (o *OptInt) Reset() {
+	var v int
+	o.Value = v
+	o.Set = false
+}
+
+// SetTo sets value to v.
+func (o *OptInt) SetTo(v int) {
+	o.Set = true
+	o.Value = v
+}
+
+// Get returns value and boolean that denotes whether value was set.
+func (o OptInt) Get() (v int, ok bool) {
+	if !o.Set {
+		return v, false
+	}
+	return o.Value, true
+}
+
+// Or returns value if set, or given parameter if does not.
+func (o OptInt) Or(d int) int {
+	if v, ok := o.Get(); ok {
+		return v
+	}
+	return d
+}
 
 // NewOptString returns new OptString with value set to v.
 func NewOptString(v string) OptString {

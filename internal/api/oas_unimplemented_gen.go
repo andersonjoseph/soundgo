@@ -104,6 +104,15 @@ func (UnimplementedHandler) GetAudioFile(ctx context.Context, params GetAudioFil
 	return r, ht.ErrNotImplemented
 }
 
+// GetUserAudios implements getUserAudios operation.
+//
+// This operation retrieves a user's audios. It supports pagination and optional authentication.
+//
+// GET /users/{id}/audios
+func (UnimplementedHandler) GetUserAudios(ctx context.Context, params GetUserAudiosParams) (r GetUserAudiosRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // ResetPassword implements resetPassword operation.
 //
 // This operation resets a user's password. The request requires a valid password reset code and a

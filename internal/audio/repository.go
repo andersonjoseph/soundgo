@@ -24,6 +24,7 @@ type UpdateInput struct {
 type Repository interface {
 	Save(ctx context.Context, i SaveInput) (Entity, error)
 	Get(context.Context, string) (Entity, error)
+	GetByUser(ctx context.Context, userID string, after string, limit uint64, excludeHidden bool) ([]Entity, error)
 	Delete(context.Context, string) error
 	Update(ctx context.Context, audioID string, i UpdateInput) (Entity, error)
 }

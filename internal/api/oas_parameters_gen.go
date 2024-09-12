@@ -313,6 +313,241 @@ func decodeGetAudioFileParams(args [1]string, argsEscaped bool, r *http.Request)
 	return params, nil
 }
 
+// GetUserAudiosParams is parameters of getUserAudios operation.
+type GetUserAudiosParams struct {
+	// ID of the user.
+	ID string
+	// Request will retrieve all audios after this ID.
+	XPaginationAfter OptString
+	// Limit of results per page.
+	XPaginationLimit OptInt
+}
+
+func unpackGetUserAudiosParams(packed middleware.Parameters) (params GetUserAudiosParams) {
+	{
+		key := middleware.ParameterKey{
+			Name: "id",
+			In:   "path",
+		}
+		params.ID = packed[key].(string)
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "X-Pagination-After",
+			In:   "header",
+		}
+		if v, ok := packed[key]; ok {
+			params.XPaginationAfter = v.(OptString)
+		}
+	}
+	{
+		key := middleware.ParameterKey{
+			Name: "X-Pagination-Limit",
+			In:   "header",
+		}
+		if v, ok := packed[key]; ok {
+			params.XPaginationLimit = v.(OptInt)
+		}
+	}
+	return params
+}
+
+func decodeGetUserAudiosParams(args [1]string, argsEscaped bool, r *http.Request) (params GetUserAudiosParams, _ error) {
+	h := uri.NewHeaderDecoder(r.Header)
+	// Decode path: id.
+	if err := func() error {
+		param := args[0]
+		if argsEscaped {
+			unescaped, err := url.PathUnescape(args[0])
+			if err != nil {
+				return errors.Wrap(err, "unescape path")
+			}
+			param = unescaped
+		}
+		if len(param) > 0 {
+			d := uri.NewPathDecoder(uri.PathDecoderConfig{
+				Param:   "id",
+				Value:   param,
+				Style:   uri.PathStyleSimple,
+				Explode: false,
+			})
+
+			if err := func() error {
+				val, err := d.DecodeValue()
+				if err != nil {
+					return err
+				}
+
+				c, err := conv.ToString(val)
+				if err != nil {
+					return err
+				}
+
+				params.ID = c
+				return nil
+			}(); err != nil {
+				return err
+			}
+			if err := func() error {
+				if err := (validate.String{
+					MinLength:    0,
+					MinLengthSet: false,
+					MaxLength:    0,
+					MaxLengthSet: false,
+					Email:        false,
+					Hostname:     false,
+					Regex:        regexMap["^[0-9a-fA-F]{8}\\b-[0-9a-fA-F]{4}\\b-[0-9a-fA-F]{4}\\b-[0-9a-fA-F]{4}\\b-[0-9a-fA-F]{12}$"],
+				}).Validate(string(params.ID)); err != nil {
+					return errors.Wrap(err, "string")
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		} else {
+			return validate.ErrFieldRequired
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "id",
+			In:   "path",
+			Err:  err,
+		}
+	}
+	// Decode header: X-Pagination-After.
+	if err := func() error {
+		cfg := uri.HeaderParameterDecodingConfig{
+			Name:    "X-Pagination-After",
+			Explode: false,
+		}
+		if err := h.HasParam(cfg); err == nil {
+			if err := h.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotXPaginationAfterVal string
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToString(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotXPaginationAfterVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.XPaginationAfter.SetTo(paramsDotXPaginationAfterVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.XPaginationAfter.Get(); ok {
+					if err := func() error {
+						if err := (validate.String{
+							MinLength:    0,
+							MinLengthSet: false,
+							MaxLength:    0,
+							MaxLengthSet: false,
+							Email:        false,
+							Hostname:     false,
+							Regex:        regexMap["^[0-9a-fA-F]{8}\\b-[0-9a-fA-F]{4}\\b-[0-9a-fA-F]{4}\\b-[0-9a-fA-F]{4}\\b-[0-9a-fA-F]{12}$"],
+						}).Validate(string(value)); err != nil {
+							return errors.Wrap(err, "string")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "X-Pagination-After",
+			In:   "header",
+			Err:  err,
+		}
+	}
+	// Set default value for header: X-Pagination-Limit.
+	{
+		val := int(20)
+		params.XPaginationLimit.SetTo(val)
+	}
+	// Decode header: X-Pagination-Limit.
+	if err := func() error {
+		cfg := uri.HeaderParameterDecodingConfig{
+			Name:    "X-Pagination-Limit",
+			Explode: false,
+		}
+		if err := h.HasParam(cfg); err == nil {
+			if err := h.DecodeParam(cfg, func(d uri.Decoder) error {
+				var paramsDotXPaginationLimitVal int
+				if err := func() error {
+					val, err := d.DecodeValue()
+					if err != nil {
+						return err
+					}
+
+					c, err := conv.ToInt(val)
+					if err != nil {
+						return err
+					}
+
+					paramsDotXPaginationLimitVal = c
+					return nil
+				}(); err != nil {
+					return err
+				}
+				params.XPaginationLimit.SetTo(paramsDotXPaginationLimitVal)
+				return nil
+			}); err != nil {
+				return err
+			}
+			if err := func() error {
+				if value, ok := params.XPaginationLimit.Get(); ok {
+					if err := func() error {
+						if err := (validate.Int{
+							MinSet:        true,
+							Min:           1,
+							MaxSet:        true,
+							Max:           100,
+							MinExclusive:  false,
+							MaxExclusive:  false,
+							MultipleOfSet: false,
+							MultipleOf:    0,
+						}).Validate(int64(value)); err != nil {
+							return errors.Wrap(err, "int")
+						}
+						return nil
+					}(); err != nil {
+						return err
+					}
+				}
+				return nil
+			}(); err != nil {
+				return err
+			}
+		}
+		return nil
+	}(); err != nil {
+		return params, &ogenerrors.DecodeParamError{
+			Name: "X-Pagination-Limit",
+			In:   "header",
+			Err:  err,
+		}
+	}
+	return params, nil
+}
+
 // UpdateAudioParams is parameters of updateAudio operation.
 type UpdateAudioParams struct {
 	// ID of the audio.

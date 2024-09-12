@@ -72,6 +72,12 @@ type Handler interface {
 	//
 	// GET /audios/{id}/file
 	GetAudioFile(ctx context.Context, params GetAudioFileParams) (GetAudioFileRes, error)
+	// GetUserAudios implements getUserAudios operation.
+	//
+	// This operation retrieves a user's audios. It supports pagination and optional authentication.
+	//
+	// GET /users/{id}/audios
+	GetUserAudios(ctx context.Context, params GetUserAudiosParams) (GetUserAudiosRes, error)
 	// ResetPassword implements resetPassword operation.
 	//
 	// This operation resets a user's password. The request requires a valid password reset code and a

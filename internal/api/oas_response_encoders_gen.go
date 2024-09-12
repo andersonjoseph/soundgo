@@ -433,6 +433,62 @@ func encodeGetAudioFileResponse(response GetAudioFileRes, w http.ResponseWriter,
 	}
 }
 
+func encodeGetUserAudiosResponse(response GetUserAudiosRes, w http.ResponseWriter, span trace.Span) error {
+	switch response := response.(type) {
+	case *GetUserAudiosOKHeaders:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		// Encoding response headers.
+		{
+			h := uri.NewHeaderEncoder(w.Header())
+			// Encode "X-Pagination-Next" header.
+			{
+				cfg := uri.HeaderParameterEncodingConfig{
+					Name:    "X-Pagination-Next",
+					Explode: false,
+				}
+				if err := h.EncodeParam(cfg, func(e uri.Encoder) error {
+					if val, ok := response.XPaginationNext.Get(); ok {
+						return e.EncodeValue(conv.StringToString(val))
+					}
+					return nil
+				}); err != nil {
+					return errors.Wrap(err, "encode X-Pagination-Next header")
+				}
+			}
+		}
+		w.WriteHeader(200)
+		span.SetStatus(codes.Ok, http.StatusText(200))
+
+		e := new(jx.Encoder)
+		e.ArrStart()
+		for _, elem := range response.Response {
+			elem.Encode(e)
+		}
+		e.ArrEnd()
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	case *GetUserAudiosBadRequest:
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(400)
+		span.SetStatus(codes.Error, http.StatusText(400))
+
+		e := new(jx.Encoder)
+		response.Encode(e)
+		if _, err := e.WriteTo(w); err != nil {
+			return errors.Wrap(err, "write")
+		}
+
+		return nil
+
+	default:
+		return errors.Errorf("unexpected response type: %T", response)
+	}
+}
+
 func encodeResetPasswordResponse(response ResetPasswordRes, w http.ResponseWriter, span trace.Span) error {
 	switch response := response.(type) {
 	case *ResetPasswordNoContent:

@@ -136,6 +136,61 @@ func (r PGRepository) SavePlayCount(ctx context.Context, ID string, count uint64
 	return count, err
 }
 
+func (r PGRepository) GetByUser(ctx context.Context, userID string, after string, limit uint64, excludeHidden bool) ([]Entity, error) {
+	if limit == 0 {
+		limit = 20
+	}
+
+	builder := psql.
+		Select("id", "title", "description", "play_count", "status", "created_at", "user_id").
+		From("audios").
+		Where("user_id = ?", userID).
+		OrderBy("id ASC").
+		Limit(limit)
+
+	if after != "" {
+		builder = builder.Where("id > ?", after)
+	}
+	if excludeHidden {
+		builder = builder.Where("status != 'hidden'")
+	}
+
+	query, args, err := builder.ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := r.db.Query(ctx, query, args...)
+	if err != nil {
+		return nil, handlePgError(err)
+	}
+	defer rows.Close()
+
+	var entities []Entity
+	for rows.Next() {
+		var e Entity
+		err := rows.Scan(
+			&e.ID,
+			&e.Title,
+			&e.Description,
+			&e.Playcount,
+			&e.Status,
+			&e.CreatedAt,
+			&e.UserID,
+		)
+		if err != nil {
+			return nil, handlePgError(err)
+		}
+		entities = append(entities, e)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, handlePgError(err)
+	}
+
+	return entities, nil
+}
+
 func updateIfNotZero(builder *squirrel.UpdateBuilder, colName string, val any) {
 	switch t := val.(type) {
 	case string, api.UpdateAudioInputStatus:

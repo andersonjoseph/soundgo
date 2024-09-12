@@ -37,6 +37,10 @@ type GetAudioRes interface {
 	getAudioRes()
 }
 
+type GetUserAudiosRes interface {
+	getUserAudiosRes()
+}
+
 type ResetPasswordRes interface {
 	resetPasswordRes()
 }
