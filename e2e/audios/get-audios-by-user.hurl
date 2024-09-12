@@ -33,7 +33,7 @@ HTTP 201
 POST http://{{HOST}}:{{PORT}}/audios
 Authorization: Bearer {{token}}
 [MultipartFormData]
-title: my first audio
+title: my second audio
 description: just a test
 file: file,test.m4a; audio/mp4
 status: hidden
@@ -67,3 +67,38 @@ jsonpath "$[0].playCount" == 0
 jsonpath "$[0].status" == "published"
 
 jsonpath "$[1].id" exists
+
+# get paginated audios by user while authenticated as owner
+GET http://{{HOST}}:{{PORT}}/users/{{userID}}/audios
+Authorization: Bearer {{token}}
+X-Pagination-Limit: 1
+HTTP 200
+[Captures]
+afterID: jsonpath "$[0].id"
+[Asserts]
+jsonpath "$[0].id" exists
+jsonpath "$[0].createdAt" exists
+
+jsonpath "$[0].title" == "my first audio"
+jsonpath "$[0].description" == "just a test"
+jsonpath "$[0].playCount" == 0
+jsonpath "$[0].status" == "published"
+
+jsonpath "$[1].id" not exists
+
+# get paginated audios by user while authenticated as owner
+GET http://{{HOST}}:{{PORT}}/users/{{userID}}/audios
+Authorization: Bearer {{token}}
+X-Pagination-After: {{afterID}}
+HTTP 200
+[Captures]
+[Asserts]
+jsonpath "$[0].id" exists
+jsonpath "$[0].createdAt" exists
+
+jsonpath "$[0].title" == "my second audio"
+jsonpath "$[0].description" == "just a test"
+jsonpath "$[0].playCount" == 0
+jsonpath "$[0].status" == "hidden"
+
+jsonpath "$[1].id" not exists

@@ -11,8 +11,7 @@ func (h Handler) GetUserAudios(ctx context.Context, params api.GetUserAudiosPara
 	currUser, err := reqcontext.CurrentUserID.Get(ctx)
 
 	excludeHidden := err != nil || currUser != params.ID
-
-	audios, err := h.repository.GetByUser(ctx, params.ID, params.XPaginationAfter.Value, uint64(params.XPaginationLimit.Value), excludeHidden)
+	audios, err := h.repository.GetByUser(ctx, params.ID, params.XPaginationAfter.Value, uint64(params.XPaginationLimit.Or(20)), excludeHidden)
 
 	var paginationNext string
 	if len(audios) > 0 {

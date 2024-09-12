@@ -137,10 +137,6 @@ func (r PGRepository) SavePlayCount(ctx context.Context, ID string, count uint64
 }
 
 func (r PGRepository) GetByUser(ctx context.Context, userID string, after string, limit uint64, excludeHidden bool) ([]Entity, error) {
-	if limit == 0 {
-		limit = 20
-	}
-
 	builder := psql.
 		Select("id", "title", "description", "play_count", "status", "created_at", "user_id").
 		From("audios").
