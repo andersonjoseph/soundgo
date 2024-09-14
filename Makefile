@@ -9,6 +9,9 @@ build-env:
 start-env:
 	docker compose --profile dev up -d --wait
 
+dev-server:
+	docker compose exec soundgo_env bash -c 'go run ./cmd/main/*.go >> ./log/test.log'
+
 stop-env:
 	docker compose --profile dev down -v
 

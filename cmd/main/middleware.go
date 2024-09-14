@@ -72,7 +72,7 @@ func LogRequestMiddlware(h http.Handler, rf RouteFinder, logger *slog.Logger) ht
 			"operation", route.OperationID(),
 			"path", route.PathPattern(),
 			"method", r.Method,
-			"duration", time.Since(start),
+			"duration", time.Since(start).Milliseconds(),
 			"status_code", writerWithStatus.Status,
 		)
 	})

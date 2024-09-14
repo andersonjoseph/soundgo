@@ -20,6 +20,7 @@
 # Go workspace file
 go.work
 tmp/
+log/
 openapi/spec.bundle.yaml
 uploaded-audios
 
