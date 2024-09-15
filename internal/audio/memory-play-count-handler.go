@@ -27,7 +27,6 @@ func NewMemoryPlayCountHandler(ctx context.Context, size uint64, repo playCountR
 		ticker := time.NewTicker(saveInterval)
 		defer ticker.Stop()
 
-		logger.Info("play count store scheduling started")
 		for {
 			select {
 			case <-ctx.Done():
@@ -35,14 +34,14 @@ func NewMemoryPlayCountHandler(ctx context.Context, size uint64, repo playCountR
 				return
 
 			case <-ticker.C:
-				logger.Info("processing play counts")
+				logger.Info("processing play counts", "operation", "processPlayCounts")
 				err := processCounts(ctx, &set, repo)
 				if err != nil {
-					logger.Error("error while processing counts in", "msg", err.Error())
+					logger.Error("error while processing counts in", "msg", err.Error(), "operation", "processPlayCounts")
 					select {
 					case errCh <- err:
 					default:
-						logger.Warn("Failed to send error to channel, maybe it's not being consumed")
+						logger.Warn("Failed to send error to channel, maybe it's not being consumed", "operation", "processPlayCounts")
 					}
 				}
 			}
@@ -61,10 +60,10 @@ func (h memoryPlayCountHandler) Add(ctx context.Context, playerID string, audio 
 	hasSpace := h.set.add(audio.ID + ":" + playerID)
 
 	if !hasSpace {
-		h.logger.Info("play count store is full, processing play counts", "size", h.set.size())
+		h.logger.Info("play count store is full, processing play counts", "size", h.set.size(), "operation", "processPlayCounts")
 		err := processCounts(ctx, h.set, h.repo)
 		if err != nil {
-			h.logger.Error("error while processing count to clear play count store", "msg", err.Error())
+			h.logger.Error("error while processing count to clear play count store", "msg", err.Error(), "operation", "processPlayCounts")
 			return err
 		}
 		return h.Add(ctx, playerID, audio)
