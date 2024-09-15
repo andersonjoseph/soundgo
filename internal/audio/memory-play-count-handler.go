@@ -97,21 +97,21 @@ func processCounts(ctx context.Context, set *safeSet, repo playCountRepository) 
 
 type safeSet struct {
 	set     map[string]struct{}
-	mu      sync.RWMutex
+	mu      sync.Mutex
 	maxSize uint64
 }
 
 func newSafeSet(size uint64) safeSet {
 	return safeSet{
-		mu:      sync.RWMutex{},
+		mu:      sync.Mutex{},
 		set:     make(map[string]struct{}, size),
 		maxSize: size,
 	}
 }
 
 func (s *safeSet) add(id string) bool {
-	s.mu.RLock()
-	defer s.mu.RUnlock()
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	if s.maxSize == uint64(len(s.set)) {
 		return false
 	}
