@@ -2,9 +2,9 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"log/slog"
 	"net/http"
 	"os"
@@ -15,6 +15,7 @@ import (
 	"github.com/andersonjoseph/soundgo/internal/audio"
 	"github.com/andersonjoseph/soundgo/internal/health"
 	"github.com/andersonjoseph/soundgo/internal/password"
+	"github.com/andersonjoseph/soundgo/internal/reqcontext"
 	"github.com/andersonjoseph/soundgo/internal/security"
 	"github.com/andersonjoseph/soundgo/internal/session"
 	"github.com/andersonjoseph/soundgo/internal/shared"
@@ -40,6 +41,10 @@ type serverHandler struct {
 }
 
 func createErrorHandler(log *slog.Logger) ogenerrors.ErrorHandler {
+	type ErrorResponse struct {
+		Error string `json:"error"`
+	}
+
 	return func(ctx context.Context, w http.ResponseWriter, r *http.Request, err error) {
 		var code = http.StatusInternalServerError
 		var ogenErr ogenerrors.Error
@@ -58,15 +63,24 @@ func createErrorHandler(log *slog.Logger) ogenerrors.ErrorHandler {
 			code = ogenErr.Code()
 		}
 		msg := err.Error()
-		log.Info(http.StatusText(code), "msg", msg)
+		reqID, err := reqcontext.RequestID.Get(ctx)
+		if err != nil {
+			log.Warn("request ID not available in error handler context")
+			return
+		}
+
+		log.Info(http.StatusText(code), "msg", msg, "ID", reqID)
 
 		if code == http.StatusInternalServerError {
 			log.Error("internal server error", "msg", msg)
 			msg = "Internal server error"
 		}
 
-		w.WriteHeader(code)
-		_, _ = io.WriteString(w, fmt.Sprintf(`{"error": "%v"}`, msg))
+		w.Header().Set("Content-Type", "application/json")
+		err = json.NewEncoder(w).Encode(ErrorResponse{Error: msg})
+		if err != nil {
+			log.Error("error sending error response", "msg", err.Error())
+		}
 	}
 }
 
