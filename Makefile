@@ -27,6 +27,9 @@ generate-openapi:
 fmt:
 	docker compose exec soundgo_env go fmt ./... 
 
+run-migrations:
+	docker compose exec soundgo_env goose -dir ./migrations up
+
 create-migration:
 	@if [ -z "$(name)" ]; then \
 			echo "Error: Please provide a migration name. Usage: make create-migration name=<migration_name>"; \
